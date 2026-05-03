@@ -317,8 +317,8 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <div class="example-label">The Knot Problem</div>
                 <div style="font-size: 15px; line-height: 1.7;">
                     <p>We call this the <em>knot problem</em>: natural language is a linear medium. Code has non-linear control flow. When you flatten branching logic into sequential text, you create "knots"—places where the model loses track of which branch it's in, iteration state gets tangled, and caller/callee frames blur.</p>
-                    <p>This is why de-knotting (Check 4) doesn't help: the knots aren't removable surface clutter. They're the <em>inevitable</em> result of representing non-linear structure in linear text.</p>
-                    <p>As <a href="https://arxiv.org/abs/2207.10397">CodeT (Chen et al., 2022)</a> demonstrated, code verification requires stronger information channels—execution feedback, test cases. Our finding confirms this from the opposite direction: when you <em>intentionally restrict</em> yourself to the weakest channel (CoT surface), it works for math but breaks for coding.</p>
+                    <p>Our de-knotting experiment (Check 4) tested whether these surface knots are the bottleneck. They are not: removing them leaves coding performance unchanged ($\Delta$=+0.006). This suggests the coding weakness runs deeper than any one class of noisy spans, but we emphasize this is a negative finding—it rules out one explanation, rather than confirming another.</p>
+                    <p>As <a href="https://arxiv.org/abs/2207.10397">CodeT (Chen et al., 2022)</a> demonstrated,code verification benefits from stronger information channels—execution feedback, test cases. Our finding is consistent with this: when you intentionally restrict yourself to the weakest channel (CoT surface), it works for math but breaks for coding. Whether this failure stems from the linear-text vs.\ non-linear-code mismatch specifically, or from other aspects of the coding domain, remains an open question.</p>
                 </div>
             </div>
         </section>
@@ -402,7 +402,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <li><strong>Science:</strong> Minimal change (Δ=−0.006).</li>
                 <li><strong>Coding:</strong> Neutral (Δ=+0.006). Removing knots doesn't help.</li>
             </ul>
-            <p>This asymmetry is informative: in math, circular reasoning is a symptom of the <em>disease</em> (wrong reasoning). In coding, circular reasoning is a symptom of the <em>medium</em> (linear text struggling with branching logic). Removing it doesn't cure coding because the underlying problem isn't circular reasoning—it's the representational mismatch.</p>
+            <p>This asymmetry is informative: in math, circular reasoning is a symptom of the disease (wrong reasoning). In coding, removing circular spans does not help, which rules out the hypothesis that coding weakness is caused by removable surface clutter. Whether the deeper cause is a linear-text vs.\ non-linear-code representational mismatch—as the knot hypothesis suggests—or some other aspect of the coding domain, is not settled by this experiment.</p>
 
             <h3>F. Difficulty Band Analysis</h3>
             <p>The coding-specific CoT-only judge was evaluated across difficulty bands:</p>
