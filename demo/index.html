@@ -43,12 +43,10 @@
 <span class="t-dim">Problem:</span> Every morning Aya goes for a 9-km walk. When she walks at<span class="t-var">s</span> km/h, the walk takes her 54 minutes longer than when she walks at <span class="t-var">s + 2</span> km/h. Find <span class="t-var">s</span>.
 
 <span class="t-dim">Step 1:</span> Let walking speed be <span class="t-var">s</span> km/h. With coffee boost: <span class="t-var">s + 2</span> km/h.
-<span class="t-dim">Step 2:</span> Time = distance / speed.
-         Normal: <span class="t-var">9/s</span> hours.  Boosted: <span class="t-var">9/(s+2)</span> hours.
+<span class="t-dim">Step 2:</span> Time = distance / speed.  Normal: <span class="t-var">9/s</span> hours.  Boosted: <span class="t-var">9/(s+2)</span> hours.
 <span class="t-dim">Step 3:</span> The difference is 54 min = 9/10 hour.
          Equation: <span class="t-var">9/s - 9/(s+2) = 9/10</span>.
-<span class="t-dim">Step 4:</span> Multiply both sides by <span class="t-var">s(s+2)</span>:
-         <span class="t-var">9(s+2) - 9s = 9s(s+2)/10</span>
+<span class="t-dim">Step 4:</span> Multiply both sides by <span class="t-var">s(s+2)</span>: <span class="t-var">9(s+2) - 9s = 9s(s+2)/10</span>
          <span class="t-var">18 = 9s(s+2)/10</span>
          <span class="t-var">s(s+2) = 20</span>
 <span class="t-dim">Step 5:</span> Expand and solve the quadratic:
@@ -72,12 +70,14 @@
 <span class="t-comment"># Actual snippet from a branch_heavy coding trace (cond_rev_per1k: 5.41)</span>
 t=6 which is divisible by 3. <span class="t-warn">but note:</span> the condition is "divisible by t".
 since the product can be 0 (if any digit is 0) then that aut...
-from n upwards and check the condition for each number. <span class="t-warn">however, note</span> theexample: for n=1... digits must be divisible by t. <span class="t-warn">note that</span> if the number
+from n upwards and check the condition for each number. <span class="t-warn">however, note</span> theexample: for n=1... 
+                        digits must be divisible by t. <span class="t-warn">note that</span> if the number
 contains a 0, then... 
 <span class="t-warn">but wait</span>, the product of digits: if an...
                         
 <span class="t-warn">actually, if</span> left >= right, we return. <span class="t-warn">but we already moved</span> left, so now
-left < right again... <span class="t-warn">but note</span>: the condition says "divisible by t",
+left < right again... 
+         <span class="t-warn">but note</span>: the condition says "divisible by t",
 <span class="t-warn">however</span> the problem might require th...
     
 <span class="t-dim">Result:</span> <span class="t-err">✗ Model lost in conditional maze. Features see fluent text, miss wrong logic.</span>
