@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Correctness Is Not in the Text - Research Summary</title>
+    <title>Code Correctness Is Not in the Text</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -12,376 +12,314 @@
         <header>
             <div class="header-title">
                 <h1>Code Correctness Is Not in the Text</h1>
-                <div class="subtitle">Why Chain-of-Thought Surface Features Work for Math but Fail for Coding</div>
+                <div class="subtitle">Cross-Domain Limits of Hand-Crafted CoT-Surface Features</div>
             </div>
             <div class="author-line">
                 <strong>Yuhan Chi</strong> · Fudan University · 2026
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <a href="https://github.com/Chi-Shan0707/code-not-text">GitHub</a>
+                &nbsp;·&nbsp;
+                <a href="https://github.com/Chi-Shan0707/code-not-text/blob/main/paper/paper_v13.pdf">Paper (PDF)</a>
             </div>
         </header>
 
         <main>
-            <!-- Abstract -->
-            <section>
-                <div class="abstract">
-                    <p class="lead"><strong>Abstract.</strong> Hand-crafted Chain-of-Thought (CoT) surface features achieve AUROC 0.982 in mathematical reasoning but only 0.407 in coding. Why? This study argues that <em>math reasoning is fundamentally linear</em>—"predict next token" captures the essence of step-by-step problem solving. But <em>coding involves non-linear control flow</em>: loops, branches, and state management that natural language cannot faithfully represent. Five independent methods (feature sweep, SSL pre-training, nonlinear MLP, de-knotting, and interpretable probes) all fail to improve coding performance, demonstrating that execution correctness is not in the text—it's in the runtime.</p>
-                </div>
-            </section>
 
-            <!-- Core Motivation: Linear vs Branching -->
-            <section id="motivation">
-                <h2>1. The Core Motivation: Why Math and Coding Are Different</h2>
+        <!-- ===== Section 1: Background ===== -->
+        <section id="background">
+            <h2>1. Background: Can We Judge a Run by Its Trace?</h2>
 
-                <p class="lead">Before presenting results, we need to understand why we expected text-based features to work in the first place, and why they fundamentally fail for coding.</p>
+            <p class="lead">Large language models boost reasoning through <em>sample-evaluate-ensemble</em> pipelines: generate many solutions, pick the best. But how do you know which one is correct without running ground-truth checks?</p>
 
-                <div class="motivation-comparison">
-                    <div class="motivation-card linear">
-                        <h4>📐 Math & Science: Linear Reasoning</h4>
-                        <p>Mathematical and scientific reasoning is <strong>inherently sequential</strong>:</p>
-                        <ul>
-                            <li>Solve step A → verify → proceed to step B</li>
-                            <li>"Predict next token" aligns with "predict next reasoning step"</li>
-                            <li>Mistakes create visible patterns: hesitation, backtracking, circular reasoning</li>
-                            <li>Text features capture <em>reasoning quality</em></li>
-                        </ul>
-                        <p style="margin-top: 16px; font-size: 15px;"><strong>Result:</strong> AUROC 0.982 (math), 0.850 (science)</p>
-                    </div>
+            <p>A long line of work has studied this question. <a href="https://arxiv.org/abs/2110.14168">Cobbe et al. (2021)</a> trained verifiers to score reasoning traces. <a href="https://arxiv.org/abs/2305.20050">Lightman et al. (2023)</a> showed that process-level reward models outperform outcome-level ones in math. <a href="https://arxiv.org/abs/2404.01030">Math-Shepherd</a> extended this to step-by-step verification without human annotations. <a href="https://arxiv.org/abs/2501.13431">ProcessBench</a> evaluated step-level error detection, and <a href="https://arxiv.org/abs/2408.15240">generative verifiers</a> cast reward modeling as next-token prediction.</p>
 
-                    <div class="motivation-card branching">
-                        <h4>💻 Coding: The NLC Problem</h4>
-                        <p>Coding involves <strong>Natural Language Linearization Confusion (NLC)</strong>:</p>
-                        <ul>
-                            <li><strong>Branches (16% of runs):</strong> If-else paths get flattened—model executes both simultaneously</li>
-                            <li><strong>Loops (32% of runs):</strong> Iteration state lost in linear text</li>
-                            <li><strong>Calls (12% of runs):</strong> Caller/callee frames get mixed</li>
-                            <li>Confident reasoning ≠ correct execution</li>
-                        </ul>
-                        <p style="margin-top: 16px; font-size: 15px;"><strong>Result:</strong> AUROC 0.434 (52% gap from math)</p>
-                    </div>
-                </div>
+            <p>But these approaches have costs. Training a process reward model requires substantial data and compute. Running an LLM judge at inference time is expensive. The natural question becomes: <strong>before investing in a sophisticated verifier, what can be recovered from a very cheap feature family?</strong></p>
 
-                <div class="insight-box">
-                    <h4>The "Knot" Hypothesis</h4>
-                    <p>We call this the <em>knot problem</em>: natural language (a linear medium) cannot faithfully represent non-linear control flow without "knots"—places where state is lost, branches get tangled, and the text becomes unreadable. In math, reasoning naturally follows a linear path. In coding, the mental model involves branches and loops that get flattened into linear text, creating a representational mismatch.</p>
-                </div>
-            </section>
+            <p>Cheap features matter because they enable real-time deployment: <em>early stopping</em> (prune unpromising traces to save tokens), <em>best-of-N selection</em> (rank candidates without a full reward model), and <em>training guidance</em> (signal which trajectories are healthy). If simple CoT surface features can predict correctness, we get these benefits almost for free.</p>
 
-            <!-- Heavy Branch Examples -->
-            <section id="examples">
-                <h2>2. What "Heavy Branching" Looks Like</h2>
+            <div class="insight-box">
+                <h4>The Core Question</h4>
+                <p>Can hand-crafted CoT-surface features—token confidence, trajectory shape, activation summaries—indicate whether a solution is correct? And does this transfer across domains?</p>
+            </div>
+        </section>
 
-                <p>To understand why text features fail for coding, we analyzed 10,688 coding runs and annotated them using <strong>GLM-4, Python scripts, and human annotation</strong> (with emphasis on coding). We identified three types of "knots" that correlate with failure:</p>
+        <!-- ===== Section 2: Feature Family ===== -->
+        <section id="features">
+            <h2>2. Feature Family: What We Measure</h2>
 
-                <div class="annotation-box">
-                    <div style="font-weight: 600; margin-bottom: 8px;">Annotation Methods:</div>
-                    <div class="annotation-methods">
-                        <span class="annotation-badge annotation-glm">GLM-4</span>
-                        <span class="annotation-badge annotation-python">Python Scripts</span>
-                        <span class="annotation-badge annotation-human">Human Annotation</span>
-                    </div>
-                    <div style="font-size: 14px; color: var(--text-muted);">Coding domain was the primary focus of annotation effort</div>
-                </div>
+            <p>We study five hand-crafted features computed from cached token streams and sparse activations. These are deliberately <em>cheap</em>—no LLM inference, no execution, no hidden-state probing.</p>
 
-                <div class="heavy-branch-grid">
-                    <div class="heavy-branch-card branch-heavy">
-                        <span class="heavy-branch-badge">NLC: SIMULTANEOUS BRANCHES</span>
-                        <h5>The Perfect Example: Executing Both Paths</h5>
-                        <div class="heavy-branch-snippet">"If left < right, we move the pointer. So we check if nums[left] == target. Actually, if left >= right, we return. But we already moved left, so now left < right again..."</div>
-                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model says "If left < right" but then realizes it already moved left—so now left < right again. It's <em>simultaneously executing both branches</em> because linear text can't represent exclusive paths.</p>
-                    </div>
+            <h3>Token-Level Summaries</h3>
 
-                    <div class="heavy-branch-card branch-heavy">
-                        <span class="heavy-branch-badge">CONDITIONAL BRANCH</span>
-                        <h5>Heavy Branch: "but note" Syndrome</h5>
-                        <div class="heavy-branch-metric">cond_rev_per1k: 5.40 (threshold: >3.0)</div>
-                        <div class="heavy-branch-snippet">t=6 which is divisible by 3. but note: the condition is "divisible by t". since the product can be 0 (if any digit is 0) then that aut... from n upwards and check the condition for each number. however, note the example: for n=1</div>
-                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model trapped in conditional logic maze—constantly checking "but note", "however" because it lost track of which branch it's in.</p>
-                    </div>
+            <table class="feature-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Computation</th>
+                        <th>Intuition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>tok_conf</code></td>
+                        <td>Mean negative log-probability over visible prefix tokens</td>
+                        <td>Lower = model is more certain. Confident models tend to be correct.</td>
+                    </tr>
+                    <tr>
+                        <td><code>tok_gini</code></td>
+                        <td>Gini coefficient of per-token probability distributions</td>
+                        <td>Higher = distribution is more peaked. Converged reasoning has sharp distributions.</td>
+                    </tr>
+                </tbody>
+            </table>
 
-                    <div class="heavy-branch-card loop-heavy">
-                        <span class="heavy-branch-badge">LOOP KNOT</span>
-                        <h5>Heavy Loop: Nested Index Hell</h5>
-                        <div class="heavy-branch-metric">loop_rev_per1k: 1.81</div>
-                        <div class="heavy-branch-snippet">for each pair (i, j) with i < j, store... s) that also have product x, but with indices such that p < q < r < s and the gaps are satisfied. but then, for each pair (p, r), i need to consid... ch q between p+1 and r-1, and for each s between r+1 and the end</div>
-                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model tries to track 6 loop indices (i, j, p, q, r, s) in natural language—iteration state gets lost.</p>
-                    </div>
-                </div>
+            <h3>Trajectory Statistics</h3>
 
-                <div class="example-box">
-                    <div class="example-label">What These Examples Show</div>
-                    <div style="font-size: 15px; line-height: 1.7;">
-                        <p>These aren't "reasoning errors" in the traditional sense. The model isn't making logical mistakes—it's <strong>drowning in control flow</strong>. The text shows:</p>
-                        <ul>
-                            <li>High confidence (token_conf_mean is normal)</li>
-                            <li>High "reversal density" (lots of "but", "however", "wait")</li>
-                            <li>But the reversals aren't about self-correction—they're about <em>tracking branching state</em></li>
-                        </ul>
-                        <p><strong>Key insight:</strong> In math, "but wait" means "I found a mistake." In coding, "but wait" means "I lost track of which branch I'm in."</p>
-                    </div>
-                </div>
-            </section>
+            <p>Trajectory features slice the CoT trace into segments (every ~40 words) and compute set-overlap statistics:</p>
 
-            <!-- Core Findings -->
-            <section id="findings">
-                <h2>3. Empirical Findings: Math Works, Coding Fails</h2>
+            <table class="feature-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Computation</th>
+                        <th>Intuition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>traj_continuity</code></td>
+                        <td>Mean Jaccard similarity between <em>consecutive</em> slices</td>
+                        <td>How much does the reasoning stay on the same topic? High continuity = coherent reasoning.</td>
+                    </tr>
+                    <tr>
+                        <td><code>traj_reflection_count</code></td>
+                        <td>Negated count of <em>non-adjacent</em> slice pairs with Jaccard > 0.30</td>
+                        <td>How often does the model revisit earlier ideas? More negative = more backtracking. In math, this captures "failure to converge."</td>
+                    </tr>
+                    <tr>
+                        <td><code>traj_novelty</code></td>
+                        <td>Mean of (1 − max Jaccard with all prior slices)</td>
+                        <td>How much new ground does each step cover? Balanced novelty = healthy exploration.</td>
+                    </tr>
+                </tbody>
+            </table>
 
-                <p>We evaluated our feature family across three domains using 31,040 model runs on DeepSeek-R1-0528-Qwen3-8B:</p>
+            <div class="technical-box">
+                <h5>Key Detail: Jaccard Over Word Sets</h5>
+                <p>Each slice's content is converted to a set of keywords. Jaccard similarity <code>J(A,B) = |A ∩ B| / |A ∪ B|</code> measures how much two slices overlap in vocabulary. These are <em>surface</em> features—they operate on word overlap, not semantic understanding.</p>
+            </div>
 
-                <table class="comparison-table">
-                    <thead>
-                        <tr>
-                            <th>Domain</th>
-                            <th>AoA (95% CI)</th>
-                            <th>Best-of-N=64 Gain</th>
-                            <th>Signal Quality</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="domain-header">Math</td>
-                            <td class="value-good">0.958 [0.931, 0.980]</td>
-                            <td class="value-good">+10.0% pass@1</td>
-                            <td>Features capture reasoning quality</td>
-                        </tr>
-                        <tr>
-                            <td class="domain-header">Science</td>
-                            <td class="value-mid">0.799 [0.775, 0.822]</td>
-                            <td class="value-mid">+8.0% pass@1</td>
-                            <td>Partial signal (token confidence drives most)</td>
-                        </tr>
-                        <tr>
-                            <td class="domain-header">Coding</td>
-                            <td class="value-bad">0.434 [0.404, 0.464]</td>
-                            <td class="value-bad">-0.6% (no gain)</td>
-                            <td>Text misses execution correctness</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <h3>The Pipeline</h3>
+            <div class="technical-box">
+                <p><code>StandardScaler → TruncatedSVD → LogisticRegression</code></p>
+                <p>Fit separately per domain. Evaluation uses problem-grouped splits. The main metric is <strong>AoA (AUC-of-AUROC)</strong> over anchor positions {10%, 40%, 70%, 100%}, measuring how well features discriminate correct vs. incorrect solutions as the reasoning unfolds. Bootstrap 95% CIs use B=10,000 resamplings.</p>
+            </div>
+        </section>
 
-                <div class="chart-container">
-                    <canvas id="aurocChart"></canvas>
-                    <div class="chart-caption">Figure 1: AUROC scores by domain. Math shows near-perfect discrimination (0.98), coding performs below chance (0.41).</div>
-                </div>
+        <!-- ===== Section 3: Main Results ===== -->
+        <section id="results">
+            <h2>3. Results: Math Works, Science Partial, Coding Fails</h2>
 
-                <h3>What the Confidence Intervals Mean</h3>
-                <p>The 95% CIs are non-overlapping between math and coding, confirming this is a <strong>real domain difference</strong>, not statistical noise. Even the upper bound of coding (0.464) is far below math's lower bound (0.931).</p>
-            </section>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>AoA (95% CI)</th>
+                        <th>AUROC@100%</th>
+                        <th>Best-of-N=64</th>
+                        <th>Dominant Feature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="domain-header">Math</td>
+                        <td class="value-good">0.958 [0.931, 0.980]</td>
+                        <td class="value-good">0.982</td>
+                        <td class="value-good">+10.0 pp</td>
+                        <td>traj_reflection_count (0.242)</td>
+                    </tr>
+                    <tr>
+                        <td class="domain-header">Science</td>
+                        <td class="value-mid">0.799 [0.775, 0.822]</td>
+                        <td class="value-mid">0.841</td>
+                        <td class="value-mid">+8.0 pp</td>
+                        <td>tok_gini_tail (0.038)</td>
+                    </tr>
+                    <tr>
+                        <td class="domain-header">Coding</td>
+                        <td class="value-bad">0.434 [0.404, 0.464]</td>
+                        <td class="value-bad">0.407</td>
+                        <td class="value-bad">−0.6 pp</td>
+                        <td>None above noise</td>
+                    </tr>
+                </tbody>
+            </table>
 
-            <!-- Feature Definitions -->
-            <section id="features">
-                <h2>4. Feature Family: What We Actually Measured</h2>
+            <div class="chart-container">
+                <canvas id="aurocChart"></canvas>
+                <div class="chart-caption">Figure 1: AUROC at each anchor position (10%–100% of trace visible). Math rises early and plateaus high; science improves gradually; coding stays flat throughout.</div>
+            </div>
 
-                <p>Our features are <strong>surface-level CoT features</strong>—they operate on the text of reasoning traces without understanding semantic content:</p>
+            <h3>Math: Trajectory Structure Carries the Signal</h3>
+            <p>In math, the probe <em>substantially</em> outperforms the token-confidence baseline: AoA 0.958 vs. 0.685. The signal emerges early—reaching 95% of final AUROC by the 10% anchor. Permutation importance shows <code>traj_reflection_count</code> dominates (importance 0.242), followed by <code>traj_continuity</code> (0.092) and <code>traj_novelty</code> (0.052). This is a <strong>trajectory-driven</strong> pattern: math correctness is visible in <em>how the reasoning unfolds</em>.</p>
 
-                <table class="feature-table">
-                    <thead>
-                        <tr>
-                            <th>Feature Family</th>
-                            <th>Example</th>
-                            <th>What It Captures</th>
-                            <th>Why It Should Work</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>tok_conf_*</code></td>
-                            <td>Mean token confidence</td>
-                            <td>How certain the model appears</td>
-                            <td>Confident models are often correct</td>
-                        </tr>
-                        <tr>
-                            <td><code>tok_gini_*</code></td>
-                            <td>Gini coefficient of token dist</td>
-                            <td>Distribution sharpness</td>
-                            <td>Sharp distributions indicate certainty</td>
-                        </tr>
-                        <tr>
-                            <td><code>traj_continuity</code></td>
-                            <td>Sequential stability score</td>
-                            <td>How smooth the reasoning is</td>
-                            <td>Discontinuous jumps may indicate errors</td>
-                        </tr>
-                        <tr>
-                            <td><code>traj_reflection_count</code></td>
-                            <td>Count of "but", "however", "wait"</td>
-                            <td>Self-correction events</td>
-                            <td>Catching mistakes is good reasoning</td>
-                        </tr>
-                        <tr>
-                            <td><code>traj_novelty</code></td>
-                            <td>New token introduction rate</td>
-                            <td>Exploration vs exploitation</td>
-                            <td>Balanced exploration indicates health</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <h3>Science: Confidence, Not Structure</h3>
+            <p>Science shows positive but qualitatively different results. The full probe (AoA 0.799) doesn't beat a simple <code>tok_conf</code> baseline (AoA 0.809). The leading features are <code>tok_gini_tail</code>, <code>tok_conf_recency</code>, <code>tok_conf_prefix</code>—all confidence-based. The science signal is genuine but comes from <em>how certain the model sounds</em>, not from reasoning structure.</p>
 
-                <div class="technical-box">
-                    <h5>Feature Extraction Pipeline</h5>
-                    <pre><code># Example: Computing reflection features from CoT trace
-def compute_reflection_density(co_trace: str) -> float:
-    """Count linguistic markers of self-correction per 1K chars."""
-    reflection_markers = ["but", "however", "wait", "actually", "although"]
-    total_count = sum(co_trace.lower().count(m) for m in reflection_markers)
-    return (total_count / len(co_trace)) * 1000
+            <h3>Coding: Below Chance</h3>
+            <p>Coding achieves AoA 0.434 and AUROC@100% 0.407—<em>below</em> the <code>tok_conf</code> baseline (0.506). No best-of-N gain (−0.6 pp). The 95% CIs are non-overlapping with math, confirming this is a real domain gap, not statistical noise.</p>
 
-# In math: this captures mistake detection
-# In coding: this captures "lost in branches" confusion</code></pre>
-                </div>
-
-                <p><strong>The critical point:</strong> These features work in math because they measure <em>reasoning quality</em>. In coding, they measure something else—text fluency, not execution correctness.</p>
-            </section>
-
-            <!-- Five Methods -->
-            <section id="methods">
-                <h2>5. Five Methods, One Convergent Result</h2>
-
-                <p>We tested five independent approaches to ensure our findings are robust. All converge on the same conclusion: text-based features can't predict code correctness.</p>
-
-                <div class="method-card">
-                    <h4>Method 1: Feature Sweep (83 Coding-Specific Features)</h4>
-                    <p><strong>Approach:</strong> Designed 83 features specifically for code: indentation depth, function complexity, keyword frequencies, AST-based metrics, loop nesting depth.</p>
-                    <p><strong>Result:</strong> <span class="method-result weak">Best coding AUROC: 0.556</span></p>
-                    <p><strong>Interpretation:</strong> Even with code-specific features, performance barely exceeds random. The problem isn't feature selection—it's that <em>execution correctness isn't in the text</em>.</p>
-                </div>
-
-                <div class="method-card">
-                    <h4>Method 2: SSL Pre-training (42K Unlabeled Traces)</h4>
-                    <p><strong>Approach v1:</strong> Used self-supervised learning on 42K unlabeled coding traces with a shared encoder across all domains.</p>
-                    <p><strong>Result v1:</strong> <span class="method-result poor">Complete failure—loss stalled at 0.432, rank=8 collapsed</span></p>
-                    <p><strong>Approach v2:</strong> Per-domain encoders with enhanced 50D features (including META features) and multi-objective VICReg training.</p>
-                    <p><strong>Result v2:</strong> <span class="method-result neutral">Science +6.7pp, Coding +4.9pp</span> (but only at low labels)</p>
-                    <p><strong>Interpretation:</strong> SSL v1's failure revealed that domains are <em>fundamentally different</em>. A universal text encoder can't work. SSL v2's partial success shows that domain-specific treatment helps, but coding still lags far behind. SSL learns <em>text structure</em>, but code correctness isn't in the structure—it's in the execution.</p>
-                </div>
-
-                <div class="method-card">
-                    <h4>Method 3: Nonlinear MLP (Deep Neural Network)</h4>
-                    <p><strong>Approach:</strong> Trained a deep neural network to learn nonlinear feature combinations.</p>
-                    <p><strong>Result:</strong> <span class="method-result poor">Coding AUROC: 0.499–0.507</span></p>
-                    <p><strong>Interpretation:</strong> Adding model capacity doesn't help. If the signal isn't in the features, a more powerful model can't create it.</p>
-                </div>
-
-                <div class="method-card">
-                    <h4>Method 4: De-knotting (Remove Circular Reasoning)</h4>
-                    <p><strong>Approach:</strong> Identified and removed "knots" (circular reasoning spans) from CoT traces, hypothesizing they add noise.</p>
-                    <p><strong>Result:</strong> <span class="method-result neutral">AUROC change: +0.006</span></p>
-                    <p><strong>Interpretation:</strong> Cleaning up reasoning traces doesn't help. The "knots" in coding aren't reasoning errors—they're <em>structural</em>. Removing them doesn't fix the fundamental mismatch.</p>
-                </div>
-
-                <div class="method-card">
-                    <h4>Method 5: Interpretable Probe (LogReg + SVD)</h4>
-                    <p><strong>Approach:</strong> Logistic regression with SVD dimensionality reduction on our 5 core features.</p>
-                    <p><strong>Result:</strong> <span class="method-result poor">Coding AUROC: 0.434</span></p>
-                    <p><strong>Interpretation:</strong> The interpretable baseline performs below chance, confirming that the features themselves don't contain useful signal for coding.</p>
-                </div>
-
-                <div class="chart-container">
-                    <canvas id="methodsChart"></canvas>
-                    <div class="chart-caption">Figure 2: All five methods fail on coding (AUROC < 0.6), while working well on math.</div>
-                </div>
-            </section>
-
-            <!-- What This Means -->
-            <section id="implications">
-                <h2>6. What These Failures Mean</h2>
-
-                <h3>6.1. SSL Learns Structure, Not Correctness</h3>
-                <p>Self-supervised learning (Method 2) successfully learns <em>text structure</em>—just like BERT learns sentence structure. But code correctness isn't about text structure. It's about:</p>
+            <div class="insight-box">
+                <h4>Feature Importance Contrast</h4>
+                <p>This is the key finding: <strong>the same feature family measures different things in different domains</strong>.</p>
                 <ul>
-                    <li>Runtime behavior (does this loop terminate?)</li>
-                    <li>Edge cases (what if the array is empty?)</li>
-                    <li>State correctness (did I update the right variable?)</li>
+                    <li><strong>Math:</strong> Trajectory features dominate → features measure <em>reasoning quality</em></li>
+                    <li><strong>Science:</strong> Token confidence dominates → features measure <em>model certainty</em></li>
+                    <li><strong>Coding:</strong> Nothing dominates → features measure <em>text fluency</em>, not correctness</li>
                 </ul>
-                <p>These aren't in the text, so SSL can't learn them.</p>
+                <p>This is a <a href="https://doi.org/10.1177/109442810031002">measurement invariance failure</a> (<a href="https://doi.org/10.1162/coli_a_00449">Vandenberg & Lance, 2000</a>; <a href="https://doi.org/10.1162/coli_a_00449">Belinkov, 2022</a>): the same operationalization measures different latent constructs across contexts.</p>
+            </div>
+        </section>
 
-                <h3>6.2. Feature Engineering Can't Create What Isn't There</h3>
-                <p>Method 1 tested 88 total features (5 general + 83 coding-specific). Method 3 added non-linear modeling. Method 4 cleaned up the text. None helped. This converges on one conclusion: <strong>execution correctness is not recoverable from CoT text</strong>.</p>
+        <!-- ===== Section 4: Why Coding Fails ===== -->
+        <section id="why-coding-fails">
+            <h2>4. Why Coding Fails: Five Convergent Checks</h2>
 
-                <h3>6.3. The "Knot" Problem Is Structural, Not Superficial</h3>
-                <p>The heavy branch examples show that coding CoT traces get "knotted"—not because of bad reasoning, but because the <em>medium</em> (linear text) cannot faithfully represent the <em>message</em> (branching control flow). De-knotting (Method 4) fails because you can't unknot a knot by removing words—the knot is in the <em>structure</em>, not the <em>surface</em>.</p>
+            <p>One negative result might be a feature engineering problem. We ran five independent checks to confirm this is deeper.</p>
 
-                <h3>6.4. Measurement Invariance Failure</h3>
-                <p>Our features measure different constructs in different domains:</p>
+            <div class="method-card">
+                <h4>Check 1: Feature Sweep — 83 Coding-Specific Scalars</h4>
+                <p><strong>Approach:</strong> Designed 83 features specifically for code: <code>struct_density</code>, <code>cf_n_ifs</code> (branch count), <code>cot_trace_count</code>, indentation depth, keyword frequencies, loop nesting depth.</p>
+                <p><strong>Result:</strong> Best single feature (<code>struct_density</code>) AUROC 0.565. Best top-4 combination: <span class="method-result weak">AUROC 0.556</span></p>
+                <p><strong>Reading:</strong> These features are not pure noise—<code>cf_n_ifs</code> weakly correlates with correctness. But the effects remain small and semantically mixed. Deeper branching weakly correlates positively, denser structural narration weakly negatively. Not enough to separate correct from incorrect.</p>
+            </div>
+
+            <div class="method-card">
+                <h4>Check 2: Self-Supervised Pre-training</h4>
+                <p><strong>Approach:</strong> SSL on 42K unlabeled traces. SSL learns <em>text structure</em> (like BERT learns sentence structure)—recurring patterns, common phrases, syntactic regularities.</p>
+                <p><strong>v1 result:</strong> <span class="method-result poor">Collapsed—loss stalled at 0.432, rank=8 offered nothing</span></p>
+                <p><strong>v2 result:</strong> Per-domain encoders with VICReg. Coding full-label ceiling: <span class="method-result poor">AUROC 0.454</span> (peaks at 0.537 with only 5% labels)</p>
+                <p><strong>Reading:</strong> v1's failure showed domains are fundamentally different—a universal encoder can't work. v2's partial success at low labels shows SSL helps with regularization, but doesn't uncover correctness-relevant structure. SSL learns that <code>for</code> often follows <code>range</code>, but not whether the loop terminates correctly.</p>
+            </div>
+
+            <div class="method-card">
+                <h4>Check 3: Nonlinear MLP</h4>
+                <p><strong>Approach:</strong> One-hidden-layer MLP on 25D features—can it learn nonlinear combinations that linear models miss?</p>
+                <p><strong>Result:</strong> <span class="method-result poor">AUROC 0.499–0.507</span></p>
+                <p><strong>Reading:</strong> Adding model capacity doesn't help. If the signal isn't in the features, no amount of nonlinearity can extract it.</p>
+            </div>
+
+            <div class="method-card">
+                <h4>Check 4: De-knotting — Removing Circular Reasoning Spans</h4>
+                <p><strong>Approach:</strong> One hypothesis: coding traces contain noisy circular spans ("knots") that obscure an otherwise useful signal. We used GLM-4 and human annotation to identify knot spans, then removed them from all cached per-token arrays.</p>
+                <p><strong>Result by domain:</strong></p>
                 <ul>
-                    <li><strong>In math:</strong> They measure reasoning quality (does the trace show "failure to converge" patterns?)</li>
-                    <li><strong>In coding:</strong> They measure text fluency (is the CoT coherent?), not correctness</li>
+                    <li><strong>Math:</strong> Removing knots <em>degrades</em> AUROC (0.502 → 0.453, Δ=−0.049) — these spans <em>carry signal</em></li>
+                    <li><strong>Science:</strong> Minimal change (Δ=−0.006)</li>
+                    <li><strong>Coding:</strong> <span class="method-result neutral">Neutral (0.460 → 0.466, Δ=+0.006)</span></li>
                 </ul>
-                <p>This is a <em>measurement invariance failure</em>: the same operationalization measures different underlying constructs across contexts.</p>
-            </section>
+                <p><strong>Reading:</strong> In math, knot spans are informative—they're where the model struggles and reveals uncertainty. In coding, they're neither helpful nor harmful. The coding weakness isn't attributable to removable surface clutter.</p>
+            </div>
 
-            <!-- FAQ -->
-            <section id="faq">
-                <h2>7. Frequently Asked Questions</h2>
+            <div class="method-card">
+                <h4>Check 5: Coding-Specific Run Judge</h4>
+                <p><strong>Approach:</strong> 19 surface features (planning density, vocabulary overlap, structural flags, length, neuron count, <code>cot_mode</code> indicators). Evaluated on unseen <code>problem_id</code>s via 5-fold GroupKFold.</p>
+                <p><strong>Result:</strong> <span class="method-result poor">OOF AUC 0.481 ± 0.053</span> — fails on unseen problems</p>
+                <p><strong>Reading:</strong> Surface cues that appear meaningful within problems do not generalize across problems.</p>
+            </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">Q: Did you try execution-aware features?</div>
-                    <div class="faq-answer">A: That's exactly what we're <em>not</em> testing. We deliberately limited ourselves to <em>text-based</em> features to test whether CoT contains execution information. Our findings show it doesn't. Execution-aware features (running code, unit tests) would work, but that's a different paradigm—we're testing the limits of <em>text-only</em> verification.</div>
+            <div class="chart-container">
+                <canvas id="methodsChart"></canvas>
+                <div class="chart-caption">Figure 2: All five robustness checks on coding. No approach achieves meaningful discrimination (AUROC > 0.6).</div>
+            </div>
+        </section>
+
+        <!-- ===== Section 5: Why ===== -->
+        <section id="why">
+            <h2>5. Why the Divergence?</h2>
+
+            <p>The convergent failure across five methods points to something deeper than feature engineering. Here's our best explanation:</p>
+
+            <h3>Math: Correctness Lives in the Reasoning Process</h3>
+            <p>Mathematical reasoning is inherently sequential: solve step A, verify, proceed to step B. <em>Predict next token</em> aligns naturally with <em>predict next reasoning step</em>. When a solution fails, the trace shows visible patterns—hesitation, backtracking, circular reasoning. Our features capture these because in math, <strong>correctness is coupled with reasoning quality</strong>.</p>
+            <p>As <a href="https://arxiv.org/abs/2307.13702">Lanham et al. (2023)</a> showed, CoT traces aren't always faithful—but in math, unfaithful reasoning tends to fail, creating a useful correlation between trace quality and correctness.</p>
+
+            <h3>Science: Confidence as Proxy</h3>
+            <p>Science problems share some verbal uncertainty cues with math, but the usable signal comes primarily from token confidence, not trajectory structure. This makes sense: science questions often test <em>knowledge</em> rather than <em>reasoning process</em>. The model either knows the answer (high confidence) or doesn't.</p>
+
+            <h3>Coding: Correctness Lives in the Execution</h3>
+            <p>Programming involves control flow that natural language cannot faithfully represent:</p>
+            <ul>
+                <li><strong>Branches:</strong> Conditional logic with mutually exclusive paths. In linear text, the model describes both paths simultaneously.</li>
+                <li><strong>Loops:</strong> Iterative state updates. Describing iteration in linear text loses the "current state" at each step.</li>
+                <li><strong>State:</strong> Variable bindings and runtime behavior that leave no trace in the CoT text.</li>
+            </ul>
+            <p>A model can write highly confident, well-structured pseudo-code that fails on edge cases. Our features would rate this as "high quality" but it's actually wrong. <strong>Code correctness is not in the text—it's in the runtime.</strong></p>
+
+            <div class="example-box">
+                <div class="example-label">The Knot Problem</div>
+                <div style="font-size: 15px; line-height: 1.7;">
+                    <p>We call this the <em>knot problem</em>: natural language is a linear medium. Code has non-linear control flow. When you flatten branching logic into sequential text, you create "knots"—places where the model loses track of which branch it's in, iteration state gets tangled, and caller/callee frames blur.</p>
+                    <p>This is why de-knotting (Check 4) doesn't help: the knots aren't removable surface clutter. They're the <em>inevitable</em> result of representing non-linear structure in linear text.</p>
+                    <p>As <a href="https://arxiv.org/abs/2207.10397">CodeT (Chen et al., 2022)</a> demonstrated, code verification requires stronger information channels—execution feedback, test cases. Our finding confirms this from the opposite direction: when you <em>intentionally restrict</em> yourself to the weakest channel (CoT surface), it works for math but breaks for coding.</p>
                 </div>
+            </div>
+        </section>
 
-                <div class="faq-item">
-                    <div class="faq-question">Q: Why does SSL fail if BERT works so well on text?</div>
-                    <div class="faq-answer">A: SSL (like BERT) learns <em>text structure</em>. BERT can predict the next word in a sentence because sentences have structure. But code correctness isn't about predicting the next word in the CoT trace—it's about predicting <em>runtime behavior</em>. SSL can learn that "def function_name(" usually follows "return ", but it can't learn whether the function is correct.</div>
-                </div>
+        <!-- ===== Section 6: What This Means ===== -->
+        <section id="implications">
+            <h2>6. What This Means</h2>
 
-                <div class="faq-item">
-                    <div class="faq-question">Q: Is this model-specific?</div>
-                    <div class="faq-answer">A: We tested DeepSeek-R1-0528-Qwen3-8B. However, the fundamental limitation (linear text vs branching execution) should generalize. Different models may have different confidence patterns or writing styles, but the core issue remains: you can't extract execution correctness from text alone.</div>
-                </div>
+            <h3>Practical Takeaway</h3>
+            <p>For math and science, cheap CoT surface features are genuinely useful—they enable early stopping, best-of-N selection, and quality monitoring at near-zero cost. For coding, you need stronger signals: execution feedback, test cases, or model internals.</p>
 
-                <div class="faq-item">
-                    <div class="faq-question">Q: What about LLM judges or GPT-4 verification?</div>
-                    <div class="faq-answer">A: Those are different approaches. We're testing <em>hand-crafted surface features</em>. LLM judges use semantic understanding (they read the code and "think" about it). Our question was: can we predict correctness from <em>surface patterns</em> (confidence, trajectory shape) without understanding? Answer: no for coding, yes for math.</div>
-                </div>
+            <h3>What We Don't Claim</h3>
+            <div class="technical-box">
+                <ul>
+                    <li>We don't claim <em>all</em> text-based verifiers fail on coding. <a href="https://arxiv.org/abs/2303.11366">LLM judges</a>, <a href="https://arxiv.org/abs/2303.17651">self-refinement</a>, or raw-text classifiers may work—they use different information channels.</li>
+                    <li>We don't claim execution-aware methods won't work (they should!).</li>
+                    <li>All experiments use a <strong>single model</strong> (DeepSeek-R1-0528-Qwen3-8B). Results may differ for other architectures.</li>
+                    <li>Our SSL conclusion is objective-specific: it shows failure under the tested pretraining losses, not a universal impossibility.</li>
+                </ul>
+            </div>
 
-                <div class="faq-item">
-                    <div class="faq-question">Q: Does this mean text-based verifiers are useless for coding?</div>
-                    <div class="faq-answer">A: No. It means <em>hand-crafted CoT surface features</em> don't work. Other approaches like LLM judges, execution-based verifiers, or hybrid methods may work. Our claim is limited to: surface features extracted from CoT text cannot predict code correctness.</div>
-                </div>
-            </section>
+            <h3>Broader Context</h3>
+            <p>This connects to a growing understanding that CoT quality is <a href="https://arxiv.org/abs/2310.01798">domain-dependent</a>. <a href="https://arxiv.org/abs/2310.01798">Huang et al. (2023)</a> showed that LLMs cannot self-correct reasoning yet. <a href="https://arxiv.org/abs/2406.02514">Liu et al. (2024)</a> found some intrinsic self-correction ability. Our contribution is showing that even the <em>measurability</em> of correctness from CoT surface depends on the domain—the same instrument measures different things.</p>
+        </section>
 
-            <!-- Technical Appendix -->
-            <section id="technical">
-                <h2>8. Technical Appendix</h2>
+        <!-- ===== Section 7: Technical Details ===== -->
+        <section id="technical">
+            <h2>7. Technical Appendix</h2>
 
-                <h3>8.1. Experimental Setup</h3>
-                <div class="technical-box">
-                    <h5>Model</h5>
-                    <p>DeepSeek-R1-0528-Qwen3-8B (8B parameters, reasoning-specialized)</p>
+            <div class="technical-box">
+                <h5>Model</h5>
+                <p>DeepSeek-R1-0528-Qwen3-8B (8B parameters, reasoning-specialized), temperature 1.0.</p>
 
-                    <h5>Datasets</h5>
-                    <ul>
-                        <li><strong>Math:</strong> AIME24/25, BRUMO25, HMMT25 (7,680 runs)</li>
-                        <li><strong>Science:</strong> GPQA Diamond (12,672 runs)</li>
-                        <li><strong>Coding:</strong> LiveCodeBench-v5 (10,688 runs)</li>
-                    </ul>
+                <h5>Data</h5>
+                <ul>
+                    <li><strong>Math:</strong> 7,680 runs across AIME24, AIME25, BRUMO25, HMMT25</li>
+                    <li><strong>Science:</strong> 12,672 runs from GPQA Diamond</li>
+                    <li><strong>Coding:</strong> 10,688 runs from LiveCodeBench-v5</li>
+                    <li><strong>Total:</strong> 31,040 runs</li>
+                </ul>
 
-                    <h5>Evaluation Metric</h5>
-                    <p>We use <strong>AoA (AUC-of-AUROC)</strong>: the area under the AUROC curve across 10 anchor points (10%, 20%, ..., 100%) in the CoT trace. This measures how well features discriminate correct vs. incorrect solutions <em>as the reasoning unfolds</em>.</p>
+                <h5>Annotation Pipeline (Coding)</h5>
+                <p>Coding traces were annotated for knot spans using GLM-4, Python pattern-matching scripts, and human review. The multi-method approach ensured comprehensive coverage of circular reasoning, branch confusion, and loop tangles.</p>
 
-                    <h5>Statistical Validation</h5>
-                    <p>All confidence intervals are 95% bootstrap CIs (10,000 resamples). The math-coding gap is statistically significant (p < 0.001).</p>
+                <h5>Metric</h5>
+                <p><strong>AoA (AUC-of-AUROC)</strong> over anchor positions {10%, 40%, 70%, 100%}: measures how well features discriminate correct vs. incorrect as reasoning unfolds. We also report AUROC@100% and dense 10-anchor checks. Bootstrap 95% CIs use B=10,000 resamplings per domain.</p>
 
-                    <h5>Annotation Pipeline</h5>
-                    <p>Coding domain was annotated using three complementary methods: GLM-4 (large language model), Python scripts (pattern-based), and human annotation. This multi-method approach ensured comprehensive coverage of "knot" patterns.</p>
-                </div>
+                <h5>Reproducibility</h5>
+                <p>All tables come from <code>results/tables/</code> and <code>workshop/cotknot/results/tables/</code>. Key artifacts: <code>coding_feature_family_ablation.csv</code>, <code>cot_run_judge_scores.csv</code>, <code>cot_run_judge_rerank.csv</code>.</p>
+            </div>
+        </section>
 
-                <h3>8.2. What We Don't Claim</h3>
-                <div class="technical-box">
-                    <p><strong>Limitations:</strong></p>
-                    <ul>
-                        <li>We don't claim that <em>all</em> text-based verifiers fail on coding</li>
-                        <li>We don't claim that execution-aware methods won't work (they should!)</li>
-                        <li>We don't test larger models or other architectures</li>
-                        <li>Results may not generalize to all programming languages</li>
-                    </ul>
-                    <p><strong>Future Work:</strong> Execution-aware verification, hybrid text+execution approaches, domain-specific feature engineering for other programming tasks.</p>
-                </div>
-            </section>
         </main>
 
         <footer>
             <p><strong>Code Correctness Is Not in the Text</strong></p>
             <p>Yuhan Chi · Fudan University · 2026</p>
-            <p class="text-muted"><a href="https://github.com/Chi-Shan0707/code-not-text">GitHub Repository</a> · <a href="https://github.com/Chi-Shan0707/code-not-text/blob/main/paper/paper_v13.pdf">Full Paper (PDF)</a></p>
+            <p><a href="https://github.com/Chi-Shan0707/code-not-text">GitHub Repository</a> · <a href="https://github.com/Chi-Shan0707/code-not-text/blob/main/paper/paper_v13.pdf">Full Paper (PDF)</a></p>
         </footer>
     </div>
 
