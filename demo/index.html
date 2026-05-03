@@ -25,6 +25,55 @@
 
         <main>
 
+        <!-- ===== Hero: Side-by-side CoT Comparison ===== -->
+        <section id="hero-comparison">
+            <div class="comparison-intro">
+                <p class="lead">Same model, same feature family. Completely different stories.</p>
+            </div>
+            <div class="terminal-grid">
+                <div class="terminal-card terminal-math">
+                    <div class="terminal-header">
+                        <span class="terminal-dot terminal-dot-green"></span>
+                        <span class="terminal-dot terminal-dot-yellow"></span>
+                        <span class="terminal-dot terminal-dot-red"></span>
+                        <span class="terminal-title">Math CoT — AIME25 (is_correct: true, AUROC 0.982)</span>
+                    </div>
+                    <div class="terminal-body">
+<span class="t-comment"># Reasoning trace from a correct mathematical solution</span>
+<span class="t-dim">Step 1:</span> Let the walking speed be <span class="t-var">s</span> km/h and coffee speed be <span class="t-var">s + 2</span> km/h.
+<span class="t-dim">Step 2:</span> Time walking = <span class="t-var">9/s</span>, Time with coffee = <span class="t-var">9/(s+2)</span>.
+<span class="t-dim">Step 3:</span> The difference is 54 minutes = 9/10 hour.
+         So <span class="t-var">9/s - 9/(s+2) = 9/10</span>.
+<span class="t-dim">Step 4:</span> Multiply through: <span class="t-var">9(s+2) - 9s = 9s(s+2)/10</span>.
+         Simplify: <span class="t-var">18 = 9s(s+2)/10</span> → <span class="t-var">s(s+2) = 20</span>.
+<span class="t-dim">Step 5:</span> Solve: <span class="t-var">s² + 2s - 20 = 0</span> → <span class="t-var">s = (-2 + √84)/2 ≈ 3.58</span>.
+<span class="t-dim">Result:</span> <span class="t-ok">✓ Converges cleanly. Features detect stable, confident reasoning.</span>
+                    </div>
+                </div>
+
+                <div class="terminal-card terminal-coding">
+                    <div class="terminal-header">
+                        <span class="terminal-dot terminal-dot-green"></span>
+                        <span class="terminal-dot terminal-dot-yellow"></span>
+                        <span class="terminal-dot terminal-dot-red"></span>
+                        <span class="terminal-title">Coding CoT — LiveCodeBench-v5 #131 (is_correct: false, AUROC 0.407)</span>
+                    </div>
+                    <div class="terminal-body">
+<span class="t-comment"># Actual snippet from a branch_heavy coding trace (cond_rev_per1k: 5.41)</span>
+t=6 which is divisible by 3. <span class="t-warn">but note:</span> the condition is "divisible by t".
+since the product can be 0 (if any digit is 0) then that aut...
+from n upwards and check the condition for each number. <span class="t-warn">however, note</span> the
+example: for n=1... digits must be divisible by t. <span class="t-warn">note that</span> if the number
+contains a 0, then... <span class="t-warn">but wait</span>, the product of digits: if an...
+<span class="t-warn">actually, if</span> left >= right, we return. <span class="t-warn">but we already moved</span> left, so now
+left < right again... <span class="t-warn">but note</span>: the condition says "divisible by t",
+<span class="t-warn">however</span> the problem might require th...
+<span class="t-dim">Result:</span> <span class="t-err">✗ Model lost in conditional maze. Features see fluent text, miss wrong logic.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- ===== Section 1: Background ===== -->
         <section id="background">
             <h2>1. Background: Can We Judge a Run by Its Trace?</h2>
@@ -312,6 +361,49 @@
                 <h5>Reproducibility</h5>
                 <p>All tables come from <code>results/tables/</code> and <code>workshop/cotknot/results/tables/</code>. Key artifacts: <code>coding_feature_family_ablation.csv</code>, <code>cot_run_judge_scores.csv</code>, <code>cot_run_judge_rerank.csv</code>.</p>
             </div>
+        </section>
+
+        <!-- ===== Bonus: Extra Details ===== -->
+        <section id="bonus">
+            <h2>Appendix: Extra Details from the Paper</h2>
+
+            <p>For readers who want more depth, here are additional findings that didn't fit the main narrative.</p>
+
+            <h3>A. Cross-Anchor Transfer</h3>
+            <p>We tested whether an SVD basis learned at one trace position transfers to another. Math exhibits near-lossless transfer: forward gap Δ=−0.001, backward Δ=−0.006. Science shows a larger forward gap (Δ=−0.010), suggesting its quality geometry is less stable across positions. This means math has a consistent "quality structure" throughout the trace; science's structure shifts as the reasoning progresses.</p>
+
+            <h3>B. Dense-Anchor Robustness</h3>
+            <p>Our main results use 4 anchor positions (10%, 40%, 70%, 100%). On a denser 10-anchor grid, the domain ordering remains unchanged: AoA reaches 0.968 (math), 0.827 (science), and 0.432 (coding). Science continues improving into later anchors, while coding stays weak throughout—confirming the gap isn't an artifact of sparse measurement.</p>
+
+            <h3>C. Self-Consistency Oracle</h3>
+            <p>A self-consistency oracle (using ground truth to know the majority answer) achieves AoA 0.953 (math), 0.921 (science), and 0.961 (coding). The fact that SC oracle achieves 0.961 in coding means coding correctness <em>is</em> predictable—just not from text surface features. This validates our interpretation: the information exists (in execution, in hidden states), but our features can't access it.</p>
+
+            <h3>D. Grouped Family Ablations</h3>
+            <p>We tested whether coding failure stems from one bad feature subset. Results:</p>
+            <ul>
+                <li><code>traj_only</code>: AUROC 0.509</li>
+                <li><code>token_plus_traj</code>: AUROC 0.501</li>
+                <li>Full 30-feature surface family: AUROC 0.506</li>
+            </ul>
+            <p>No subset performs well—the failure is distributed across the entire feature family, not concentrated in one group.</p>
+
+            <h3>E. De-knotting Across Domains</h3>
+            <p>De-knotting has opposite effects in different domains:</p>
+            <ul>
+                <li><strong>Math:</strong> AUROC drops from 0.502 → 0.453 (Δ=−0.049). Knot spans <em>carry signal</em>—they're where the model struggles.</li>
+                <li><strong>Science:</strong> Minimal change (Δ=−0.006).</li>
+                <li><strong>Coding:</strong> Neutral (Δ=+0.006). Removing knots doesn't help.</li>
+            </ul>
+            <p>This asymmetry is informative: in math, circular reasoning is a symptom of the <em>disease</em> (wrong reasoning). In coding, circular reasoning is a symptom of the <em>medium</em> (linear text struggling with branching logic). Removing it doesn't cure coding because the underlying problem isn't circular reasoning—it's the representational mismatch.</p>
+
+            <h3>F. Difficulty Band Analysis</h3>
+            <p>The coding-specific CoT-only judge was evaluated across difficulty bands:</p>
+            <ul>
+                <li>Hard problems: AUC 0.515</li>
+                <li>Mid problems: AUC 0.470</li>
+                <li>Easy problems: AUC 0.509</li>
+            </ul>
+            <p>Performance stays near chance across all difficulty levels, confirming the failure isn't limited to hard problems.</p>
         </section>
 
         </main>

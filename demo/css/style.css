@@ -550,6 +550,97 @@ a:hover {
 .mt-3 { margin-top: 24px; }
 .mb-3 { margin-bottom: 24px; }
 
+/* ========================================
+   TERMINAL-STYLE COC COMPARISON CARDS
+   ======================================== */
+
+.comparison-intro {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.terminal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.terminal-card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.terminal-math .terminal-header {
+    background: #1e1e2e;
+    color: #a6e3a1;
+    border-bottom: 2px solid #2f9e44;
+}
+
+.terminal-coding .terminal-header {
+    background: #1e1e2e;
+    color: #f38ba8;
+    border-bottom: 2px solid #fa5252;
+}
+
+.terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.terminal-dot-green { background: #a6e3a1; }
+.terminal-dot-yellow { background: #f9e2af; }
+.terminal-dot-red { background: #f38ba8; }
+
+.terminal-title {
+    margin-left: 8px;
+    font-family: monospace;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.terminal-body {
+    background: #11111b;
+    color: #cdd6f4;
+    padding: 18px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", Consolas, monospace;
+    font-size: 13.5px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    min-height: 240px;
+}
+
+.t-comment { color: #6c7086; }
+.t-dim { color: #9399b2; }
+.t-var { color: #89b4fa; }
+.t-ok { color: #a6e3a1; font-weight: 600; }
+.t-err { color: #f38ba8; font-weight: 600; }
+.t-warn {
+    color: #fab387;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgba(250, 179, 135, 0.3);
+}
+
+/* Light mode terminal adjustments */
+@media (prefers-color-scheme: light) {
+    .terminal-body {
+        background: #1e1e2e;
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     body {
@@ -558,6 +649,15 @@ a:hover {
 
     .container {
         padding: 0 20px;
+    }
+
+    .terminal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .terminal-body {
+        font-size: 12px;
+        min-height: 180px;
     }
 
     .finding-grid,
