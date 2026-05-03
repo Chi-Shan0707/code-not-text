@@ -1,37 +1,67 @@
-// Professional Academic Charts for Code-Not-Text Research
+// ========================================
+// MODERN CHART.JS CONFIGURATION
+// Academic visualizations with dark theme
+// ========================================
+
 document.addEventListener('DOMContentLoaded', function() {
 
-    // Chart.js global configuration for academic style
-    Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-    Chart.defaults.color = '#2c3e50';
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    Chart.defaults.plugins.tooltip.padding = 12;
-    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    // Set global Chart.js defaults for dark theme
+    Chart.defaults.color = '#b8c1ec';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+    Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
 
-    // 1. AUROC Comparison Chart
-    const aurocCtx = document.getElementById('aurocChart').getContext('2d');
-    new Chart(aurocCtx, {
+    // Create AUROC Comparison Chart
+    createAUROCChart();
+
+    // Create Reranking Impact Chart
+    createRerankingChart();
+
+    // Setup reading progress
+    setupReadingProgress();
+
+    // Initialize metric animations
+    animateMetrics();
+
+    // Create floating particles for hero section
+    createParticles();
+
+    // Setup additional animations
+    setupAdvancedAnimations();
+
+});
+
+// ========================================
+// AUROC COMPARISON CHART
+// ========================================
+
+function createAUROCChart() {
+    const ctx = document.getElementById('aurocChart');
+    if (!ctx) return;
+
+    const data = {
+        labels: ['Math', 'Science', 'Coding'],
+        datasets: [{
+            label: 'AUROC Score',
+            data: [0.982, 0.850, 0.407],
+            backgroundColor: [
+                'rgba(46, 204, 113, 0.8)',  // Math - success
+                'rgba(243, 156, 18, 0.8)',  // Science - warning
+                'rgba(231, 76, 60, 0.8)'    // Coding - danger
+            ],
+            borderColor: [
+                'rgba(46, 204, 113, 1)',
+                'rgba(243, 156, 18, 1)',
+                'rgba(231, 76, 60, 1)'
+            ],
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+        }]
+    };
+
+    const config = {
         type: 'bar',
-        data: {
-            labels: ['Mathematical\nReasoning', 'Science\nProblems', 'Coding\nChallenges'],
-            datasets: [{
-                label: 'AUROC @ 100%',
-                data: [0.982, 0.841, 0.407],
-                backgroundColor: [
-                    'rgba(46, 204, 113, 0.8)',  // Green for success
-                    'rgba(243, 156, 18, 0.8)',  // Orange for partial
-                    'rgba(231, 76, 60, 0.8)'    // Red for failure
-                ],
-                borderColor: [
-                    'rgba(46, 204, 113, 1)',
-                    'rgba(243, 156, 18, 1)',
-                    'rgba(231, 76, 60, 1)'
-                ],
-                borderWidth: 2,
-                borderRadius: 8,
-                borderSkipped: false,
-            }]
-        },
+        data: data,
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -40,36 +70,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     display: false
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(15, 15, 30, 0.95)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#b8c1ec',
+                    borderColor: 'rgba(102, 126, 234, 0.5)',
+                    borderWidth: 1,
+                    padding: 15,
+                    displayColors: true,
                     callbacks: {
                         label: function(context) {
-                            const domain = context.label;
                             const value = context.parsed.y;
+                            const domain = context.label;
                             let interpretation = '';
 
-                            if (value > 0.9) {
-                                interpretation = 'Excellent - Strong signal';
-                            } else if (value > 0.7) {
-                                interpretation = 'Good - Usable signal';
-                            } else if (value > 0.5) {
-                                interpretation = 'Weak - Limited utility';
+                            if (domain === 'Math') {
+                                interpretation = 'Excellent discrimination';
+                            } else if (domain === 'Science') {
+                                interpretation = 'Moderate discrimination';
                             } else {
-                                interpretation = 'Poor - Below chance';
+                                interpretation = 'Poor discrimination';
                             }
 
-                            return `AUROC: ${value.toFixed(3)} (${interpretation})`;
+                            return [
+                                `AUROC: ${value.toFixed(3)}`,
+                                interpretation
+                            ];
                         }
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'Cross-Domain Performance Gap (31K+ samples, 95% CI verified)',
-                    font: {
-                        size: 14,
-                        weight: '600'
-                    },
-                    color: '#7f8c8d',
-                    padding: {
-                        bottom: 20
                     }
                 }
             },
@@ -79,224 +105,193 @@ document.addEventListener('DOMContentLoaded', function() {
                     max: 1.0,
                     ticks: {
                         callback: function(value) {
-                            return (value * 100).toFixed(0) + '%';
+                            return value.toFixed(2);
                         },
                         font: {
                             size: 12
                         }
                     },
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
+                        color: 'rgba(255, 255, 255, 0.05)'
                     },
                     title: {
                         display: true,
-                        text: 'AUROC (higher is better)',
+                        text: 'AUROC Score',
                         font: {
-                            size: 13,
+                            size: 14,
                             weight: '600'
                         }
                     }
                 },
                 x: {
-                    grid: {
-                        display: false
-                    },
                     ticks: {
                         font: {
                             size: 13,
-                            weight: '500'
+                            weight: '600'
                         }
+                    },
+                    grid: {
+                        display: false
                     }
                 }
             },
             animation: {
-                duration: 1500,
-                easing: 'easeInOutQuart'
+                duration: 2000,
+                easing: 'easeOutQuart'
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
             }
         }
-    });
+    };
 
-    // 2. Reranking Impact Chart
-    const rerankingCtx = document.getElementById('rerankingChart').getContext('2d');
-    new Chart(rerankingCtx, {
+    new Chart(ctx, config);
+}
+
+// ========================================
+// RERANKING IMPACT CHART
+// ========================================
+
+function createRerankingChart() {
+    const ctx = document.getElementById('rerankingChart');
+    if (!ctx) return;
+
+    const data = {
+        labels: ['Math', 'Science', 'Coding'],
+        datasets: [{
+            label: 'Pass@1 Improvement',
+            data: [10.0, 8.0, -0.6],
+            backgroundColor: [
+                'rgba(46, 204, 113, 0.8)',  // Math - success
+                'rgba(243, 156, 18, 0.8)',  // Science - warning
+                'rgba(231, 76, 60, 0.8)'    // Coding - danger
+            ],
+            borderColor: [
+                'rgba(46, 204, 113, 1)',
+                'rgba(243, 156, 18, 1)',
+                'rgba(231, 76, 60, 1)'
+            ],
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+        }]
+    };
+
+    const config = {
         type: 'bar',
-        data: {
-            labels: ['Math', 'Science', 'Coding'],
-            datasets: [
-                {
-                    label: 'Random Selection',
-                    data: [64.2, 60.2, 61.7],
-                    backgroundColor: 'rgba(149, 165, 166, 0.7)',
-                    borderColor: 'rgba(149, 165, 166, 1)',
-                    borderWidth: 2,
-                    borderRadius: 8,
-                },
-                {
-                    label: 'Probe Reranking',
-                    data: [74.2, 68.2, 61.1],
-                    backgroundColor: [
-                        'rgba(46, 204, 113, 0.8)',  // Math - big gain
-                        'rgba(243, 156, 18, 0.8)',  // Science - moderate gain
-                        'rgba(231, 76, 60, 0.8)'    // Coding - no gain
-                    ],
-                    borderColor: [
-                        'rgba(46, 204, 113, 1)',
-                        'rgba(243, 156, 18, 1)',
-                        'rgba(231, 76, 60, 1)'
-                    ],
-                    borderWidth: 2,
-                    borderRadius: 8,
-                }
-            ]
-        },
+        data: data,
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        font: {
-                            size: 13
-                        },
-                        usePointStyle: true,
-                        padding: 15
-                    }
+                    display: false
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(15, 15, 30, 0.95)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#b8c1ec',
+                    borderColor: 'rgba(102, 126, 234, 0.5)',
+                    borderWidth: 1,
+                    padding: 15,
                     callbacks: {
                         label: function(context) {
-                            const label = context.dataset.label || '';
                             const value = context.parsed.y;
                             const domain = context.label;
+                            let impact = '';
 
-                            if (context.datasetIndex === 1) { // Probe reranking
-                                let delta = value - context.chart.data.datasets[0].data[context.dataIndex];
-                                let significance = '';
-
-                                if (domain === 'Math' && delta > 5) {
-                                    significance = '✓ Significant improvement';
-                                } else if (domain === 'Science' && delta > 5) {
-                                    significance = '✓ Moderate improvement';
-                                } else if (domain === 'Coding' && Math.abs(delta) < 1) {
-                                    significance = '✗ No meaningful gain';
-                                }
-
-                                return `${label}: ${value.toFixed(1)}% (Δ${delta >= 0 ? '+' : ''}${delta.toFixed(1)}%) ${significance}`;
+                            if (domain === 'Math') {
+                                impact = 'Strong practical gain';
+                            } else if (domain === 'Science') {
+                                impact = 'Moderate practical gain';
+                            } else {
+                                impact = 'No practical gain';
                             }
 
-                            return `${label}: ${value.toFixed(1)}%`;
+                            return [
+                                `Improvement: ${value > 0 ? '+' : ''}${value.toFixed(1)}%`,
+                                impact
+                            ];
                         }
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'Best-of-N=64 Reranking: Practical Consequences',
-                    font: {
-                        size: 14,
-                        weight: '600'
-                    },
-                    color: '#7f8c8d',
-                    padding: {
-                        bottom: 20
                     }
                 }
             },
             scales: {
                 y: {
-                    beginAtZero: true,
-                    max: 100,
                     ticks: {
                         callback: function(value) {
-                            return value + '%';
+                            return (value > 0 ? '+' : '') + value + '%';
                         },
                         font: {
                             size: 12
                         }
                     },
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
+                        color: 'rgba(255, 255, 255, 0.05)'
                     },
                     title: {
                         display: true,
-                        text: 'Pass@1 Accuracy',
+                        text: 'Pass@1 Improvement (%)',
                         font: {
-                            size: 13,
+                            size: 14,
                             weight: '600'
                         }
                     }
                 },
                 x: {
-                    grid: {
-                        display: false
-                    },
                     ticks: {
                         font: {
                             size: 13,
-                            weight: '500'
+                            weight: '600'
                         }
+                    },
+                    grid: {
+                        display: false
                     }
                 }
             },
             animation: {
-                duration: 1500,
-                easing: 'easeInOutQuart'
+                duration: 2000,
+                easing: 'easeOutQuart',
+                delay: 500
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
             }
         }
-    });
+    };
 
-    // Create floating particles for hero section
-    createParticles();
-
-    // Animate metrics on scroll
-    setupMetricAnimations();
-
-    // Add scroll-based animations
-    setupScrollAnimations();
-});
-
-// Create elegant particles for hero section
-function createParticles() {
-    const particlesContainer = document.getElementById('particles');
-    if (!particlesContainer) return;
-
-    const particleCount = 15;
-
-    for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-
-        const size = Math.random() * 6 + 3;
-        const posX = Math.random() * 100;
-        const posY = Math.random() * 100;
-        const delay = Math.random() * 5;
-        const duration = Math.random() * 10 + 15;
-
-        particle.style.cssText = `
-            position: absolute;
-            width: ${size}px;
-            height: ${size}px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            left: ${posX}%;
-            top: ${posY}%;
-            animation: float ${duration}s ease-in-out ${delay}s infinite;
-            pointer-events: none;
-        `;
-
-        particlesContainer.appendChild(particle);
-    }
+    new Chart(ctx, config);
 }
 
-// Setup metric counter animations
-function setupMetricAnimations() {
-    const metrics = document.querySelectorAll('.metric-value');
+// ========================================
+// READING PROGRESS
+// ========================================
+
+function setupReadingProgress() {
+    const progressFill = document.getElementById('progressFill');
+    if (!progressFill) return;
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = (scrollTop / docHeight) * 100;
+
+        progressFill.style.width = `${progress}%`;
+    });
+}
+
+// ========================================
+// METRIC ANIMATIONS
+// ========================================
+
+function animateMetrics() {
+    const metrics = document.querySelectorAll('.metric-value, .impact-value, .result-value');
 
     const observerOptions = {
-        threshold: 0.5,
+        threshold: 0.8,
         rootMargin: '0px'
     };
 
@@ -304,8 +299,23 @@ function setupMetricAnimations() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const element = entry.target;
-                const finalValue = parseFloat(element.textContent);
-                animateValue(element, 0, finalValue, 1500);
+
+                // Add highlight animation
+                element.style.animation = 'metricHighlight 1s ease-out';
+                element.style.background = 'linear-gradient(135deg, rgba(123, 44, 191, 0.2) 0%, rgba(0, 217, 255, 0.2) 100%)';
+                element.style.padding = '0.3rem 0.6rem';
+                element.style.borderRadius = '8px';
+                element.style.webkitBackgroundClip = 'text';
+                element.style.webkitTextFillColor = 'transparent';
+
+                setTimeout(() => {
+                    element.style.background = '';
+                    element.style.padding = '';
+                    element.style.borderRadius = '';
+                    element.style.webkitBackgroundClip = '';
+                    element.style.webkitTextFillColor = '';
+                }, 1500);
+
                 observer.unobserve(element);
             }
         });
@@ -314,77 +324,97 @@ function setupMetricAnimations() {
     metrics.forEach(metric => observer.observe(metric));
 }
 
-function animateValue(element, start, end, duration) {
-    const startTime = performance.now();
-    const isDecimal = end < 1;
+// ========================================
+// FLOATING PARTICLES
+// ========================================
 
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+function createParticles() {
+    const particlesContainer = document.getElementById('particles');
+    if (!particlesContainer) return;
 
-        const currentValue = start + (end - start) * easeProgress;
+    const particleCount = 20;
 
-        if (isDecimal) {
-            element.textContent = currentValue.toFixed(3);
-        } else {
-            element.textContent = currentValue.toFixed(1);
-        }
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
 
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        } else {
-            element.textContent = isDecimal ? end.toFixed(3) : end.toFixed(1);
-        }
+        const size = Math.random() * 8 + 4;
+        const posX = Math.random() * 100;
+        const posY = Math.random() * 100;
+        const delay = Math.random() * 5;
+        const duration = Math.random() * 10 + 15;
+        const opacity = Math.random() * 0.3 + 0.1;
+
+        particle.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            background: rgba(0, 217, 255, ${opacity});
+            border-radius: 50%;
+            left: ${posX}%;
+            top: ${posY}%;
+            animation: float ${duration}s ease-in-out ${delay}s infinite;
+            pointer-events: none;
+            box-shadow: 0 0 ${size * 2}px rgba(0, 217, 255, ${opacity * 0.5});
+        `;
+
+        particlesContainer.appendChild(particle);
     }
-
-    requestAnimationFrame(update);
 }
 
-// Setup scroll-based section animations
-function setupScrollAnimations() {
-    const sections = document.querySelectorAll('section');
+// ========================================
+// ADVANCED ANIMATIONS
+// ========================================
+
+function setupAdvancedAnimations() {
+    // Setup scroll reveal
+    setupScrollReveal();
+
+    // Setup card interactions
+    setupCardInteractions();
+
+    // Setup smooth scroll
+    setupSmoothScroll();
+}
+
+function setupScrollReveal() {
+    const elementsToReveal = document.querySelectorAll(
+        '.premium-card, .modern-method, .impact-card, .premium-chart, .insight-box, .claim-card'
+    );
 
     const observerOptions = {
-        threshold: 0.1,
+        threshold: 0.15,
         rootMargin: '0px 0px -50px 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
+                setTimeout(() => {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) scale(1)';
+                }, index * 100);
+
                 observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
-    sections.forEach(section => {
-        section.style.opacity = '0';
-        section.style.transform = 'translateY(30px)';
-        section.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
-        observer.observe(section);
+    elementsToReveal.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(40px) scale(0.95)';
+        element.style.transition = 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        observer.observe(element);
     });
-
-    // Start observing after a short delay to ensure hero is visible immediately
-    setTimeout(() => {
-        sections.forEach((section, index) => {
-            if (index > 0) { // Skip hero section
-                observer.observe(section);
-            }
-        });
-    }, 100);
 }
 
-// Add hover effects to domain cards
-document.addEventListener('DOMContentLoaded', function() {
-    const domainCards = document.querySelectorAll('.domain-card');
-
-    domainCards.forEach(card => {
+function setupCardInteractions() {
+    // Premium cards hover effect
+    const premiumCards = document.querySelectorAll('.premium-card');
+    premiumCards.forEach(card => {
         card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-12px) scale(1.02)';
-            this.style.boxShadow = '0 12px 40px rgba(0,0,0,0.15)';
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+            this.style.boxShadow = '0 20px 60px rgba(123, 44, 191, 0.3)';
         });
 
         card.addEventListener('mouseleave', function() {
@@ -392,54 +422,47 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.boxShadow = '';
         });
     });
-});
 
-// Add method card hover effects
-document.addEventListener('DOMContentLoaded', function() {
-    const methodItems = document.querySelectorAll('.method-item');
-
-    methodItems.forEach((item, index) => {
-        item.style.animationDelay = `${index * 0.1}s`;
-        item.style.animation = 'fadeInUp 0.6s ease-out forwards';
-        item.style.opacity = '0';
-
-        item.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px) scale(1.03)';
-            this.style.boxShadow = '0 12px 32px rgba(0,0,0,0.15)';
-        });
-
-        item.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-            this.style.boxShadow = '';
-        });
-    });
-});
-
-// Add significance card hover effects
-document.addEventListener('DOMContentLoaded', function() {
-    const sigCards = document.querySelectorAll('.significance-card');
-
-    sigCards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.15}s`;
-        card.style.animation = 'fadeInUp 0.6s ease-out forwards';
-        card.style.opacity = '0';
-
+    // Method cards interaction
+    const methodCards = document.querySelectorAll('.modern-method');
+    methodCards.forEach(card => {
         card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px) rotateY(5deg)';
-            this.style.boxShadow = '0 12px 32px rgba(102, 126, 234, 0.2)';
+            const methodNumber = this.querySelector('.method-number');
+            if (methodNumber) {
+                methodNumber.style.transform = 'scale(1.2) rotate(360deg)';
+                methodNumber.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            }
         });
 
         card.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-            this.style.boxShadow = '';
+            const methodNumber = this.querySelector('.method-number');
+            if (methodNumber) {
+                methodNumber.style.transform = '';
+            }
         });
     });
-});
 
-// Add CTA button ripple effect
-document.addEventListener('DOMContentLoaded', function() {
+    // Impact cards interaction
+    const impactCards = document.querySelectorAll('.impact-card');
+    impactCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            const iconWrapper = this.querySelector('.card-icon-wrapper');
+            if (iconWrapper) {
+                iconWrapper.style.transform = 'scale(1.1) rotate(5deg)';
+                iconWrapper.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            }
+        });
+
+        card.addEventListener('mouseleave', function() {
+            const iconWrapper = this.querySelector('.card-icon-wrapper');
+            if (iconWrapper) {
+                iconWrapper.style.transform = '';
+            }
+        });
+    });
+
+    // CTA buttons ripple effect
     const ctaButtons = document.querySelectorAll('.cta-button');
-
     ctaButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             const ripple = document.createElement('span');
@@ -468,10 +491,9 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => ripple.remove(), 600);
         });
     });
-});
+}
 
-// Add smooth scroll behavior
-document.addEventListener('DOMContentLoaded', function() {
+function setupSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
@@ -485,46 +507,77 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
-
-// Add reading progress indicator
-function createReadingProgress() {
-    const progressBar = document.createElement('div');
-    progressBar.id = 'reading-progress';
-    progressBar.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        width: 0%;
-        z-index: 1000;
-        transition: width 0.1s ease;
-        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-    `;
-    document.body.appendChild(progressBar);
-
-    window.addEventListener('scroll', () => {
-        const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (window.pageYOffset / windowHeight) * 100;
-        progressBar.style.width = scrolled + '%';
-    });
 }
 
-createReadingProgress();
+// ========================================
+// ADDITIONAL STYLES
+// ========================================
 
-// Add CSS for ripple animation
 const style = document.createElement('style');
 style.textContent = `
+    @keyframes metricHighlight {
+        0% {
+            transform: scale(1);
+            filter: brightness(1);
+        }
+        50% {
+            transform: scale(1.15);
+            filter: brightness(1.3);
+        }
+        100% {
+            transform: scale(1);
+            filter: brightness(1);
+        }
+    }
+
     @keyframes ripple {
         to {
             transform: scale(4);
             opacity: 0;
         }
     }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+            opacity: 0.3;
+        }
+        50% {
+            transform: translate(-20px, 20px) rotate(180deg);
+            opacity: 0.8;
+        }
+    }
+
+    /* Custom scrollbar for dark theme */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0f0f1e;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #7b2cbf 0%, #e056fd 100%);
+    }
+
+    /* Chart container hover effects */
+    .premium-chart:hover .chart-container {
+        transform: scale(1.02);
+        transition: transform 0.3s ease;
+    }
+
+    .chart-container {
+        transition: transform 0.3s ease;
+    }
 `;
 document.head.appendChild(style);
 
-console.log('🚀 Code-Not-Text Demo Initialized');
-console.log('📊 Professional academic charts loaded');
-console.log('✨ Elegant animations enabled');
+console.log('📊 Modern charts loaded');
+console.log('🎨 Dark theme applied');
+console.log('✨ Animations enabled');
