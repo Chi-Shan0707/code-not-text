@@ -40,22 +40,17 @@
                     </div>
                     <div class="terminal-body">
 <span class="t-comment"># Reasoning trace from a correct mathematical solution</span>
-<span class="t-dim">Problem:</span> Every morning Aya goes for a 9-km walk. When she walks at<span class="t-var">s</span> km/h, the walk takes her 54 minutes longer than when she walks at <span class="t-var">s + 2</span> km/h. Find <span class="t-var">s</span>.
+<span class="t-dim">Problem:</span> Aya walks 9 km. At <span class="t-var">s</span> km/h it takes 54 min longer than at <span class="t-var">s+2</span> km/h.
+<span class="t-dim">Step 1:</span> Let walking speed be <span class="t-var">s</span> km/h. Boosted speed: <span class="t-var">s + 2</span> km/h.
+<span class="t-dim">Step 2:</span> Time normal = <span class="t-var">9/s</span>, Time boosted = <span class="t-var">9/(s+2)</span>.
+<span class="t-dim">Step 3:</span> The difference is 54 min = 9/10 hour: <span class="t-var">9/s − 9/(s+2) = 9/10</span>.
+<span class="t-dim">Step 4:</span> Multiply by <span class="t-var">s(s+2)</span>: <span class="t-var">18 = 9s(s+2)/10</span> → <span class="t-var">s(s+2) = 20</span>.
+<span class="t-dim">Step 5:</span> Quadratic: <span class="t-var">s² + 2s − 20 = 0</span> → <span class="t-var">s = −1 + √21 ≈ 3.58</span>.
+<span class="t-dim">Step 6:</span> Verify: <span class="t-var">9/3.58 − 9/5.58 ≈ 0.9 hr = 54 min ✓</span>
+<span class="t-dim">         Confidence is high throughout. No backtracking. traj_continuity: stable.</span>
+<span class="t-dim">         The reasoning converges monotonically — every step builds on the last.</span>
 
-<span class="t-dim">Step 1:</span> Let walking speed be <span class="t-var">s</span> km/h. With coffee boost: <span class="t-var">s + 2</span> km/h.
-<span class="t-dim">Step 2:</span> Time = distance / speed.  Normal: <span class="t-var">9/s</span> hours.  Boosted: <span class="t-var">9/(s+2)</span> hours.
-<span class="t-dim">Step 3:</span> The difference is 54 min = 9/10 hour.
-         Equation: <span class="t-var">9/s - 9/(s+2) = 9/10</span>.
-<span class="t-dim">Step 4:</span> Multiply both sides by <span class="t-var">s(s+2)</span>: <span class="t-var">9(s+2) - 9s = 9s(s+2)/10</span>
-         <span class="t-var">18 = 9s(s+2)/10</span>
-         <span class="t-var">s(s+2) = 20</span>
-<span class="t-dim">Step 5:</span> Expand and solve the quadratic:
-         <span class="t-var">s² + 2s - 20 = 0</span>
-         By the quadratic formula: <span class="t-var">s = (-2 + √84)/2 = -1 + √21 ≈ 3.58</span>
-<span class="t-dim">Step 6:</span> Verify: <span class="t-var">9/3.58 ≈ 2.51 hr</span>, <span class="t-var">9/5.58 ≈ 1.61 hr</span>,
-         difference <span class="t-var">≈ 0.9 hr = 54 min ✓</span>
-<span class="t-dim">Result:</span> <span class="t-ok">✓ 7 clean steps. traj_reflection_count = 0. Features: high confidence,</span>
-<span class="t-ok">  high continuity, zero backtracking. Correctness is visible in the trace.</span>
+<span class="t-dim">Result:</span> <span class="t-ok">✓ Clean, confident, convergent. Correctness is visible in the trace.</span>
                     </div>
                 </div>
 
