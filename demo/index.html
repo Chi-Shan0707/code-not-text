@@ -47,15 +47,15 @@
                     </div>
 
                     <div class="motivation-card branching">
-                        <h4>💻 Coding: Branching & State</h4>
-                        <p>Programming involves control flow that natural language cannot represent:</p>
+                        <h4>💻 Coding: The NLC Problem</h4>
+                        <p>Coding involves <strong>Natural Language Linearization Confusion (NLC)</strong>:</p>
                         <ul>
-                            <li><strong>Loops:</strong> Iterative state updates that linear text flattens</li>
-                            <li><strong>Branches:</strong> Conditional logic with multiple paths</li>
-                            <li><strong>State:</strong> Variable bindings, memory, runtime errors</li>
-                            <li>Confident text ≠ correct code (off-by-one errors, edge cases)</li>
+                            <li><strong>Branches (16% of runs):</strong> If-else paths get flattened—model executes both simultaneously</li>
+                            <li><strong>Loops (32% of runs):</strong> Iteration state lost in linear text</li>
+                            <li><strong>Calls (12% of runs):</strong> Caller/callee frames get mixed</li>
+                            <li>Confident reasoning ≠ correct execution</li>
                         </ul>
-                        <p style="margin-top: 16px; font-size: 15px;"><strong>Result:</strong> AUROC 0.407 (below random!)</p>
+                        <p style="margin-top: 16px; font-size: 15px;"><strong>Result:</strong> AUROC 0.434 (52% gap from math)</p>
                     </div>
                 </div>
 
@@ -83,27 +83,26 @@
 
                 <div class="heavy-branch-grid">
                     <div class="heavy-branch-card branch-heavy">
+                        <span class="heavy-branch-badge">NLC: SIMULTANEOUS BRANCHES</span>
+                        <h5>The Perfect Example: Executing Both Paths</h5>
+                        <div class="heavy-branch-snippet">"If left < right, we move the pointer. So we check if nums[left] == target. Actually, if left >= right, we return. But we already moved left, so now left < right again..."</div>
+                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model says "If left < right" but then realizes it already moved left—so now left < right again. It's <em>simultaneously executing both branches</em> because linear text can't represent exclusive paths.</p>
+                    </div>
+
+                    <div class="heavy-branch-card branch-heavy">
                         <span class="heavy-branch-badge">CONDITIONAL BRANCH</span>
                         <h5>Heavy Branch: "but note" Syndrome</h5>
-                        <div class="heavy-branch-metric">cond_rev_per1k: 5.40 (highest percentile)</div>
-                        <div class="heavy-branch-snippet">t=6 which is divisible by 3. but note: the condition is "divisible by t". since the product can be 0 (if any digit is 0) then that aut... from n upwards and check the condition for each number. however, note the example: for n=1... igits must be divisible by t. note that if the number contains a 0, then</div>
-                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model repeatedly checks conditions ("but note", "however")—trapped in conditional logic maze.</p>
+                        <div class="heavy-branch-metric">cond_rev_per1k: 5.40 (threshold: >3.0)</div>
+                        <div class="heavy-branch-snippet">t=6 which is divisible by 3. but note: the condition is "divisible by t". since the product can be 0 (if any digit is 0) then that aut... from n upwards and check the condition for each number. however, note the example: for n=1</div>
+                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model trapped in conditional logic maze—constantly checking "but note", "however" because it lost track of which branch it's in.</p>
                     </div>
 
                     <div class="heavy-branch-card loop-heavy">
                         <span class="heavy-branch-badge">LOOP KNOT</span>
                         <h5>Heavy Loop: Nested Index Hell</h5>
                         <div class="heavy-branch-metric">loop_rev_per1k: 1.81</div>
-                        <div class="heavy-branch-snippet">ctions in their reduced form. but that might lead to floating-point issues. another approach: for each pair (i, j) with i < j, store... s) that also have product x, but with indices such that p < q < r < s and the gaps are satisfied. but then, for each pair (p, r), i need to consid... ch q between p+1 and r-1, and for each s between r+1 and the end, check the condition.</div>
-                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model tries to track loop indices (i, j, p, q, r, s) in natural language—state gets lost.</p>
-                    </div>
-
-                    <div class="heavy-branch-card call-heavy">
-                        <span class="heavy-branch-badge">CALL CONFUSION</span>
-                        <h5>Heavy Call: API Ambiguity</h5>
-                        <div class="heavy-branch-metric">frame_rev_per1k: 0.87</div>
-                        <div class="heavy-branch-snippet">- update the current array 3. return the operation count. but wait, what if after removal, the a... t segment is t[0:1] -> '-' -> but wait, no: the split function in python splits the string a... we can also use the replace function but with caution. actually, we can do: we want to re</div>
-                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model uncertain about function behavior—"but wait" indicates confusion about API semantics.</p>
+                        <div class="heavy-branch-snippet">for each pair (i, j) with i < j, store... s) that also have product x, but with indices such that p < q < r < s and the gaps are satisfied. but then, for each pair (p, r), i need to consid... ch q between p+1 and r-1, and for each s between r+1 and the end</div>
+                        <p style="font-size: 13px; margin-top: 12px;"><strong>Pattern:</strong> Model tries to track 6 loop indices (i, j, p, q, r, s) in natural language—iteration state gets lost.</p>
                     </div>
                 </div>
 
@@ -247,9 +246,11 @@ def compute_reflection_density(co_trace: str) -> float:
 
                 <div class="method-card">
                     <h4>Method 2: SSL Pre-training (42K Unlabeled Traces)</h4>
-                    <p><strong>Approach:</strong> Used self-supervised learning (like BERT) on 42K unlabeled coding traces to learn domain-specific text structure.</p>
-                    <p><strong>Result:</strong> <span class="method-result poor">Full-label ceiling: AUROC 0.454</span></p>
-                    <p><strong>Interpretation:</strong> SSL learns <em>text structure</em> (syntax patterns, common phrases), but code correctness isn't a text-structure problem—it's an execution problem. No amount of representation learning can extract what isn't there.</p>
+                    <p><strong>Approach v1:</strong> Used self-supervised learning on 42K unlabeled coding traces with a shared encoder across all domains.</p>
+                    <p><strong>Result v1:</strong> <span class="method-result poor">Complete failure—loss stalled at 0.432, rank=8 collapsed</span></p>
+                    <p><strong>Approach v2:</strong> Per-domain encoders with enhanced 50D features (including META features) and multi-objective VICReg training.</p>
+                    <p><strong>Result v2:</strong> <span class="method-result neutral">Science +6.7pp, Coding +4.9pp</span> (but only at low labels)</p>
+                    <p><strong>Interpretation:</strong> SSL v1's failure revealed that domains are <em>fundamentally different</em>. A universal text encoder can't work. SSL v2's partial success shows that domain-specific treatment helps, but coding still lags far behind. SSL learns <em>text structure</em>, but code correctness isn't in the structure—it's in the execution.</p>
                 </div>
 
                 <div class="method-card">
