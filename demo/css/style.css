@@ -564,6 +564,7 @@ a:hover {
     grid-template-columns: 1fr 1fr;
     gap: 24px;
     margin-bottom: 30px;
+    align-items: stretch;
 }
 
 .terminal-card {
@@ -639,6 +640,31 @@ a:hover {
     .terminal-body {
         background: #1e1e2e;
     }
+}
+
+/* ========================================
+   REFERENCES
+   ======================================== */
+
+.reference-list {
+    list-style: decimal;
+    padding-left: 24px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.reference-list li {
+    margin-bottom: 6px;
+    padding-left: 4px;
+}
+
+.reference-list em {
+    font-style: italic;
+}
+
+.reference-list a {
+    font-size: 13px;
 }
 
 /* Responsive */

@@ -40,14 +40,30 @@
                     </div>
                     <div class="terminal-body">
 <span class="t-comment"># Reasoning trace from a correct mathematical solution</span>
-<span class="t-dim">Step 1:</span> Let the walking speed be <span class="t-var">s</span> km/h and coffee speed be <span class="t-var">s + 2</span> km/h.
-<span class="t-dim">Step 2:</span> Time walking = <span class="t-var">9/s</span>, Time with coffee = <span class="t-var">9/(s+2)</span>.
-<span class="t-dim">Step 3:</span> The difference is 54 minutes = 9/10 hour.
-         So <span class="t-var">9/s - 9/(s+2) = 9/10</span>.
-<span class="t-dim">Step 4:</span> Multiply through: <span class="t-var">9(s+2) - 9s = 9s(s+2)/10</span>.
-         Simplify: <span class="t-var">18 = 9s(s+2)/10</span> → <span class="t-var">s(s+2) = 20</span>.
-<span class="t-dim">Step 5:</span> Solve: <span class="t-var">s² + 2s - 20 = 0</span> → <span class="t-var">s = (-2 + √84)/2 ≈ 3.58</span>.
-<span class="t-dim">Result:</span> <span class="t-ok">✓ Converges cleanly. Features detect stable, confident reasoning.</span>
+<span class="t-dim">Problem:</span> Every morning Aya goes for a 9-km walk. When she walks at
+<span class="t-var">s</span> km/h, the walk takes her 54 minutes longer than when she walks
+at <span class="t-var">s + 2</span> km/h. Find <span class="t-var">s</span>.
+
+<span class="t-dim">Step 1:</span> Let walking speed be <span class="t-var">s</span> km/h.
+         With coffee boost: <span class="t-var">s + 2</span> km/h.
+<span class="t-dim">Step 2:</span> Time = distance / speed.
+         Normal: <span class="t-var">9/s</span> hours.
+         Boosted: <span class="t-var">9/(s+2)</span> hours.
+<span class="t-dim">Step 3:</span> The difference is 54 min = 9/10 hour.
+         Equation: <span class="t-var">9/s - 9/(s+2) = 9/10</span>.
+<span class="t-dim">Step 4:</span> Multiply both sides by <span class="t-var">s(s+2)</span>:
+         <span class="t-var">9(s+2) - 9s = 9s(s+2)/10</span>
+         <span class="t-var">18 = 9s(s+2)/10</span>
+         <span class="t-var">s(s+2) = 20</span>
+<span class="t-dim">Step 5:</span> Expand and solve the quadratic:
+         <span class="t-var">s² + 2s - 20 = 0</span>
+         By the quadratic formula:
+         <span class="t-var">s = (-2 + √84)/2 = -1 + √21 ≈ 3.58</span>
+<span class="t-dim">Step 6:</span> Verify: <span class="t-var">9/3.58 ≈ 2.51 hr</span>,
+         <span class="t-var">9/5.58 ≈ 1.61 hr</span>,
+         difference <span class="t-var">≈ 0.9 hr = 54 min ✓</span>
+<span class="t-dim">Result:</span> <span class="t-ok">✓ 7 clean steps. traj_reflection_count = 0. Features: high confidence,</span>
+<span class="t-ok">  high continuity, zero backtracking. Correctness is visible in the trace.</span>
                     </div>
                 </div>
 
@@ -404,6 +420,28 @@ left < right again... <span class="t-warn">but note</span>: the condition says "
                 <li>Easy problems: AUC 0.509</li>
             </ul>
             <p>Performance stays near chance across all difficulty levels, confirming the failure isn't limited to hard problems.</p>
+        </section>
+
+        <!-- ===== References ===== -->
+        <section id="references">
+            <h2>References</h2>
+
+            <ol class="reference-list">
+                <li>Wei, J. et al. (2022). Chain-of-thought prompting elicits reasoning in large language models. <em>NeurIPS</em>. <a href="https://arxiv.org/abs/2201.11903">arXiv</a></li>
+                <li>Cobbe, K. et al. (2021). Training verifiers to solve math word problems. <em>arXiv:2110.14168</em>. <a href="https://arxiv.org/abs/2110.14168">arXiv</a></li>
+                <li>Lightman, H. et al. (2023). Let's verify step by step. <em>arXiv:2305.20050</em>. <a href="https://arxiv.org/abs/2305.20050">arXiv</a></li>
+                <li>Wang, P. et al. (2024). Math-Shepherd: Verify and reinforce LLMs step-by-step without human annotations. <em>ACL</em>. <a href="https://arxiv.org/abs/2312.08935">arXiv</a></li>
+                <li>Zheng, C. et al. (2025). ProcessBench: Identifying process errors in mathematical reasoning. <em>ACL</em>. <a href="https://arxiv.org/abs/2412.01955">arXiv</a></li>
+                <li>Zhang, L. et al. (2025). Generative verifiers: Reward modeling as next-token prediction. <em>ICLR</em>. <a href="https://arxiv.org/abs/2408.15240">arXiv</a></li>
+                <li>Lanham, T. et al. (2023). Measuring faithfulness in chain-of-thought reasoning. <em>arXiv:2307.13702</em>. <a href="https://arxiv.org/abs/2307.13702">arXiv</a></li>
+                <li>Huang, J. et al. (2023). Large language models cannot self-correct reasoning yet. <em>arXiv:2310.01798</em>. <a href="https://arxiv.org/abs/2310.01798">arXiv</a></li>
+                <li>Liu, D. et al. (2024). Large language models have intrinsic self-correction ability. <em>NeurIPS</em>. <a href="https://arxiv.org/abs/2406.02514">arXiv</a></li>
+                <li>Madaan, A. et al. (2023). Self-Refine: Iterative refinement with self-feedback. <em>arXiv:2303.17651</em>. <a href="https://arxiv.org/abs/2303.17651">arXiv</a></li>
+                <li>Shinn, N. et al. (2023). Reflexion: Language agents with verbal reinforcement learning. <em>arXiv:2303.11366</em>. <a href="https://arxiv.org/abs/2303.11366">arXiv</a></li>
+                <li>Chen, B. et al. (2022). CodeT: Code generation with generated tests. <em>arXiv:2207.10397</em>. <a href="https://arxiv.org/abs/2207.10397">arXiv</a></li>
+                <li>Vandenberg, R. E. & Lance, C. E. (2000). A review and synthesis of the measurement invariance literature. <em>Organizational Research Methods</em>, 3(1), 4–70.</li>
+                <li>Belinkov, Y. (2022). Probing classifiers: Promises, shortcomings, and advances. <em>Computational Linguistics</em>, 48(1), 207–219.</li>
+            </ol>
         </section>
 
         </main>
