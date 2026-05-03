@@ -1,10 +1,14 @@
 // Academic charts for research blog
 document.addEventListener('DOMContentLoaded', function() {
 
+    // Detect dark mode
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
     // Chart.js global settings
     Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
-    Chart.defaults.color = '#495057';
-    Chart.defaults.borderColor = '#dee2e6';
+    Chart.defaults.font.size = 14;
+    Chart.defaults.color = isDark ? '#8b949e' : '#495057';
+    Chart.defaults.borderColor = isDark ? '#30363d' : '#dee2e6';
 
     // AUROC comparison chart
     createAUROCChart();
@@ -59,7 +63,8 @@ function createAUROCChart() {
                     max: 1.0,
                     title: {
                         display: true,
-                        text: 'AUROC (higher is better)'
+                        text: 'AUROC (higher is better)',
+                        font: { size: 14 }
                     },
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
@@ -82,18 +87,18 @@ function createMethodsChart() {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Interpretable\nProbe', 'Feature\nSweep', 'Nonlinear\nMLP', 'SSL\nPre-training', 'De-knotting'],
+            labels: ['Feature\nSweep', 'SSL\nPre-training', 'Nonlinear\nMLP', 'De-knotting', 'Interpretable\nProbe'],
             datasets: [
                 {
                     label: 'Math',
-                    data: [0.982, 0.990, 0.985, 0.978, 0.988],
+                    data: [0.990, 0.978, 0.985, 0.988, 0.982],
                     backgroundColor: 'rgba(47, 158, 68, 0.8)',
                     borderColor: 'rgba(47, 158, 68, 1)',
                     borderWidth: 2
                 },
                 {
                     label: 'Coding',
-                    data: [0.434, 0.556, 0.503, 0.454, 0.440],
+                    data: [0.556, 0.454, 0.503, 0.440, 0.434],
                     backgroundColor: 'rgba(250, 82, 82, 0.8)',
                     borderColor: 'rgba(250, 82, 82, 1)',
                     borderWidth: 2
@@ -106,7 +111,8 @@ function createMethodsChart() {
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: { font: { size: 13 } }
                 },
                 tooltip: {
                     callbacks: {
@@ -122,7 +128,8 @@ function createMethodsChart() {
                     max: 1.0,
                     title: {
                         display: true,
-                        text: 'AUROC (higher is better)'
+                        text: 'AUROC (higher is better)',
+                        font: { size: 14 }
                     },
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
@@ -131,6 +138,9 @@ function createMethodsChart() {
                 x: {
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                        font: { size: 12 }
                     }
                 }
             }
