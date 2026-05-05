@@ -65,7 +65,7 @@
                             (is_correct: false, AUROC 0.407)</span>
                     </div>
                     <div class="terminal-body">
-<span class="t-comment"># Actual snippet from a branch_heavy coding trace </span>
+<span class="t-comment"># Actual snippet from a branch_heavy coding trace</span>
 t=6 which is divisible by 3. <span class="t-warn">but note:</span> the condition is "divisible by t".
 since the product can be 0 (if any digit is 0) then that aut...
 from n upwards and check the condition for each number. <span class="t-warn">however, note</span> theexample: for n=1... 
@@ -132,7 +132,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
 
             <h3>Trajectory Statistics</h3>
 
-            <p>Trajectory features slice the CoT trace into segments (every ~40 words) and compute set-overlap statistics:</p>
+            <p>Trajectory features slice the CoT trace into contiguous, non-overlapping 40-word windows and compute set-overlap statistics:</p>
 
             <table class="feature-table">
                 <thead>
@@ -150,8 +150,8 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                     </tr>
                     <tr>
                         <td><code>traj_reflection_count</code></td>
-                        <td>Negated count of <em>non-adjacent</em> slice pairs with Jaccard > 0.30</td>
-                        <td>How often does the model revisit earlier ideas? More negative = more backtracking. In math, this captures "failure to converge."</td>
+                        <td>Negated count of <em>non-adjacent</em> slice pairs (≥2 slices apart, i.e. ≥80 words) with Jaccard > 0.30</td>
+                        <td>How often does the model revisit earlier ideas? More negative = more backtracking. E.g. a trace that says "...check divisibility..." then 200 words later says "...back to divisibility..." would increment this counter. In math, this captures "failure to converge."</td>
                     </tr>
                     <tr>
                         <td><code>traj_novelty</code></td>
@@ -169,7 +169,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             <h3>The Pipeline</h3>
             <div class="technical-box">
                 <p><code>StandardScaler → TruncatedSVD → LogisticRegression</code></p>
-                <p>Fit separately per domain. Evaluation uses problem-grouped splits. The main metric is <strong>AoA (AUC-of-AUROC)</strong> over anchor positions {10%, 40%, 70%, 100%}, measuring how well features discriminate correct vs. incorrect solutions as the reasoning unfolds. Bootstrap 95% CIs use B=10,000 resamplings.</p>
+                <p>Fit separately per domain. Evaluation uses problem-grouped splits. The main metric is <strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at anchor positions {10%, 40%, 70%, 100%}—measuring how well features discriminate correct vs. incorrect solutions as the reasoning unfolds. Bootstrap 95% CIs use B=10,000 resamplings.</p>
             </div>
         </section>
 
@@ -255,7 +255,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <h4>Check 2: Self-Supervised Pre-training</h4>
                 <p><strong>Approach:</strong> SSL on 42K unlabeled traces. SSL learns <em>text structure</em> (like BERT learns sentence structure)—recurring patterns, common phrases, syntactic regularities.</p>
                 <p><strong>v1 result:</strong> <span class="method-result poor">Collapsed—loss stalled at 0.432, rank=8 offered nothing</span></p>
-                <p><strong>v2 result:</strong> Per-domain encoders with VICReg. Coding full-label ceiling: <span class="method-result poor">AUROC 0.454</span> (peaks at 0.537 with only 5% labels)</p>
+                <p><strong>v2 result:</strong> Per-domain encoders with VICReg. Coding full-label result: <span class="method-result poor">AUROC 0.454</span> — paradoxically lower than the 5%-label peak of 0.537, suggesting SSL pre-training does not uncover correctness-relevant structure and may even interfere at full supervision.</p>
                 <p><strong>Reading:</strong> v1's failure showed domains are fundamentally different—a universal encoder can't work. v2's partial success at low labels shows SSL helps with regularization, but doesn't uncover correctness-relevant structure. SSL learns that <code>for</code> often follows <code>range</code>, but not whether the loop terminates correctly.</p>
             </div>
 
@@ -317,8 +317,8 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <div class="example-label">The Knot Problem</div>
                 <div style="font-size: 15px; line-height: 1.7;">
                     <p>We call this the <em>knot problem</em>: natural language is a linear medium. Code has non-linear control flow. When you flatten branching logic into sequential text, you create "knots"—places where the model loses track of which branch it's in, iteration state gets tangled, and caller/callee frames blur.</p>
-                    <p>Our de-knotting experiment (Check 4) tested whether these surface knots are the bottleneck. They are not: removing them leaves coding performance unchanged ($\Delta$=+0.006). This suggests the coding weakness runs deeper than any one class of noisy spans, but we emphasize this is a negative finding—it rules out one explanation, rather than confirming another.</p>
-                    <p>As <a href="https://arxiv.org/abs/2207.10397">CodeT (Chen et al., 2022)</a> demonstrated,code verification benefits from stronger information channels—execution feedback, test cases. Our finding is consistent with this: when you intentionally restrict yourself to the weakest channel (CoT surface), it works for math but breaks for coding. Whether this failure stems from the linear-text vs.\ non-linear-code mismatch specifically, or from other aspects of the coding domain, remains an open question.</p>
+                    <p>Our de-knotting experiment (Check 4) tested whether these surface knots are the bottleneck. They are not: removing them leaves coding performance unchanged (Δ=+0.006). This suggests the coding weakness runs deeper than any one class of noisy spans, but we emphasize this is a negative finding—it rules out one explanation, rather than confirming another.</p>
+                    <p>As <a href="https://arxiv.org/abs/2207.10397">CodeT (Chen et al., 2022)</a> demonstrated, code verification benefits from stronger information channels—execution feedback, test cases. Our finding is consistent with this: when you intentionally restrict yourself to the weakest channel (CoT surface), it works for math but breaks for coding. Whether this failure stems from the linear-text vs. non-linear-code mismatch specifically, or from other aspects of the coding domain, remains an open question.</p>
                 </div>
             </div>
         </section>
@@ -364,7 +364,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <p>Coding traces were annotated for knot spans using GLM-4, Python pattern-matching scripts, and human review. The multi-method approach ensured comprehensive coverage of circular reasoning, branch confusion, and loop tangles.</p>
 
                 <h5>Metric</h5>
-                <p><strong>AoA (AUC-of-AUROC)</strong> over anchor positions {10%, 40%, 70%, 100%}: measures how well features discriminate correct vs. incorrect as reasoning unfolds. We also report AUROC@100% and dense 10-anchor checks. Bootstrap 95% CIs use B=10,000 resamplings per domain.</p>
+                <p><strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at anchor positions {10%, 40%, 70%, 100%}: measures how well features discriminate correct vs. incorrect as reasoning unfolds. We also report AUROC@100% and dense 10-anchor checks. Bootstrap 95% CIs use B=10,000 resamplings per domain.</p>
 
                 <h5>Reproducibility</h5>
                 <p>All tables come from <code>results/tables/</code> and <code>workshop/cotknot/results/tables/</code>. Key artifacts: <code>coding_feature_family_ablation.csv</code>, <code>cot_run_judge_scores.csv</code>, <code>cot_run_judge_rerank.csv</code>.</p>
@@ -402,7 +402,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <li><strong>Science:</strong> Minimal change (Δ=−0.006).</li>
                 <li><strong>Coding:</strong> Neutral (Δ=+0.006). Removing knots doesn't help.</li>
             </ul>
-            <p>This asymmetry is informative: in math, circular reasoning is a symptom of the disease (wrong reasoning). In coding, removing circular spans does not help, which rules out the hypothesis that coding weakness is caused by removable surface clutter. Whether the deeper cause is a linear-text vs.\ non-linear-code representational mismatch—as the knot hypothesis suggests—or some other aspect of the coding domain, is not settled by this experiment.</p>
+            <p>This asymmetry is informative: in math, circular reasoning is a symptom of the <em>disease</em> (wrong reasoning). In coding, removing circular spans does not help, which rules out the hypothesis that coding weakness is caused by removable surface clutter. Whether the deeper cause is a linear-text vs. non-linear-code representational mismatch—as the knot hypothesis suggests—or some other aspect of the coding domain, is not settled by this experiment.</p>
 
             <h3>F. Difficulty Band Analysis</h3>
             <p>The coding-specific CoT-only judge was evaluated across difficulty bands:</p>
