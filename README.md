@@ -13,6 +13,8 @@
 
 *Hand-crafted CoT-surface features transfer well to math, only partly to science, and poorly to coding correctness on unseen problems.*
 
+**Interactive demo:** [chi-shan0707.github.io/code-not-text/demo](https://chi-shan0707.github.io/code-not-text/demo/)
+
 [Core Finding](#core-finding) ·
 [Five Methods](#five-methods-one-ceiling) ·
 [Results](#results) ·
