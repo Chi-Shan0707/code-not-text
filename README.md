@@ -5,7 +5,7 @@
 ### Cross-Domain Limits of Hand-Crafted CoT-Surface Features:<br>Strong in Math, Narrow in Science, Weak in Coding
 
 <p>
-  <img src="https://img.shields.io/badge/status-workshop%20paper%20v13-blue" alt="status" />
+  <img src="https://img.shields.io/badge/status-research%20project-blue" alt="status" />
   <img src="https://img.shields.io/badge/methods-5%20convergent-6f42c1" alt="methods" />
   <img src="https://img.shields.io/badge/domains-math%20%7C%20science%20%7C%20coding-0a7e5a" alt="domains" />
   <img src="https://img.shields.io/badge/license-Apache--2.0-orange" alt="license" />
@@ -37,8 +37,6 @@ Can cheap summaries of chain-of-thought (CoT) traces predict whether a solution 
 | **Math** | **0.958** [0.931, 0.980] | **0.982** | **+10.0%** |
 | **Science** | **0.799** [0.775, 0.822] | **0.841** | **+8.0%** |
 | **Coding** | 0.434 [0.404, 0.464] | 0.407 | −0.6% |
-
-**Note on Publication Status**: Due to circumstances beyond my control, this research could not be formally submitted to academic venues. The findings are shared here as a preprint and through the associated GitHub repository and personal website to ensure the work remains accessible to the research community.
 
 **Key insight**: These features measure different underlying constructs across domains. In math, they capture "failure to converge" in reasoning. In coding, where correctness requires execution, the same features measure exploratory effort—a mismatch between the measurement instrument and the target variable.
 
@@ -105,7 +103,7 @@ SSL helps in low-label regimes but doesn't change the full-label ceiling.
 ```
 code-not-text/
 ├── paper/
-│   ├── paper_v13.tex           # Current paper source (v13, cross-domain focus)
+│   ├── paper_v13.tex           # Technical report source (cross-domain analysis)
 │   └── paper_v13.pdf           # Compiled PDF
 ├── figures/
 │   ├── fig_auroc_by_anchor_v12_5.pdf   # Fig 1: AUROC curves + AoA bar chart
@@ -114,7 +112,7 @@ code-not-text/
 │   ├── fig_deknot_alldomains_v12_5.pdf # Fig 4: De-knotting ablation (all 3 domains)
 │   └── fig_knot_domain_profiles_v3.pdf  # Legacy: feature gap in break-positive subsets
 ├── scripts/
-│   ├── gen_figures_v12_5.py            # Generate all 4 paper figures
+│   ├── gen_figures_v12_5.py            # Generate all 4 figures
 │   ├── deknot_alldomains_v2.py         # De-knotting experiment v2 (all domains)
 │   ├── deknot_coding_experiment.py     # De-knotting experiment v1 (coding only)
 │   ├── analyze_glm_knot_v4.py          # Cross-domain knot analysis
@@ -150,7 +148,7 @@ python /path/to/scripts/deknot_alldomains_v2.py
 # Results: results/tables/deknot_alldomains_v2.csv
 ```
 
-### Compile paper
+### Compile technical report
 
 ```bash
 cd paper
@@ -159,7 +157,7 @@ pdflatex paper_v13.tex && pdflatex paper_v13.tex
 
 ---
 
-## Paper Summary
+## Study Summary
 
 **Model:** DeepSeek-R1-0528-Qwen3-8B
 **Data:** AIME24/25 + BRUMO25 + HMMT25 (math), GPQA (science), LiveCodeBench-v5 (coding)
@@ -184,7 +182,7 @@ Apache 2.0. See `LICENSE`.
              Strong in Math, Narrow in Science, Weak in Coding},
   author  = {Yuhan Chi},
   year    = {2026},
-  note    = {Workshop paper. Code: https://github.com/Chi-Shan0707/code-not-text}
+  note    = {Technical report. Code: https://github.com/Chi-Shan0707/code-not-text}
 }
 ```
 
