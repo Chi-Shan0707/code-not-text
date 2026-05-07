@@ -226,13 +226,13 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             </div>
 
             <h3>Math: Trajectory Structure Carries the Signal</h3>
-            <p>In math, the probe <em>substantially</em> outperforms the token-confidence baseline: AoA 0.958 vs. 0.685. The signal emerges early—reaching 95% of final AUROC by the 10% anchor. Permutation importance shows <code>traj_reflection_count</code> dominates (importance 0.242), followed by <code>traj_continuity</code> (0.092) and <code>traj_novelty</code> (0.052). This is a <strong>trajectory-driven</strong> pattern: math correctness is visible in <em>how the reasoning unfolds</em>.</p>
+            <p>In math, the probe <em>substantially</em> outperforms the token-confidence baseline: AoA 0.968 vs. 0.685. The signal emerges early—reaching 95% of final AUROC by the 10% anchor. Permutation importance shows <code>traj_reflection_count</code> dominates (importance 0.242), followed by <code>traj_continuity</code> (0.092) and <code>traj_novelty</code> (0.052). This is a <strong>trajectory-driven</strong> pattern: math correctness is visible in <em>how the reasoning unfolds</em>.</p>
 
             <h3>Science: Confidence, Not Structure</h3>
-            <p>Science shows positive but qualitatively different results. The full probe (AoA 0.799) doesn't beat a simple <code>tok_conf</code> baseline (AoA 0.809). The leading features are <code>tok_gini_tail</code>, <code>tok_conf_recency</code>, <code>tok_conf_prefix</code>—all confidence-based. The science signal is genuine but comes from <em>how certain the model sounds</em>, not from reasoning structure.</p>
+            <p>Science shows positive but qualitatively different results. The full probe (AoA 0.827) doesn't beat a simple <code>tok_conf</code> baseline (AoA 0.809). The leading features are <code>tok_gini_tail</code>, <code>tok_conf_recency</code>, <code>tok_conf_prefix</code>—all confidence-based. The science signal is genuine but comes from <em>how certain the model sounds</em>, not from reasoning structure.</p>
 
             <h3>Coding: Below Chance</h3>
-            <p>Coding achieves AoA 0.434 and AUROC@100% 0.407—<em>below</em> the <code>tok_conf</code> baseline (0.506). No best-of-N gain (−0.6 pp). The 95% CIs are non-overlapping with math, confirming this is a real domain gap, not statistical noise.</p>
+            <p>Coding achieves AoA 0.432 and AUROC@100% 0.407—<em>below</em> the <code>tok_conf</code> baseline (0.506). No best-of-N gain (−0.6 pp). The 95% CIs are non-overlapping with math, confirming this is a real domain gap, not statistical noise.</p>
 
             <div class="insight-box">
                 <h4>Feature Importance Contrast</h4>
