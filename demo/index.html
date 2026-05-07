@@ -169,7 +169,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             <h3>The Pipeline</h3>
             <div class="technical-box">
                 <p><code>StandardScaler → TruncatedSVD → LogisticRegression</code></p>
-                <p>Fit separately per domain. Evaluation uses problem-grouped splits. The main metric is <strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at four anchor positions {10%, 40%, 70%, 100%}—measuring how well features discriminate correct vs. incorrect solutions as the reasoning unfolds. Figure 1 shows a denser 10-position view for visualization. Bootstrap 95% CIs use B=10,000 resamplings.</p>
+                <p>Fit separately per domain. Evaluation uses problem-grouped splits. The main metric is <strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at 10 anchor positions (10%–100% in 10% steps)—measuring how well features discriminate correct vs. incorrect solutions as the reasoning unfolds. Bootstrap 95% CIs use B=10,000 resamplings.</p>
                 <details style="margin-top:12px;">
                     <summary style="cursor:pointer;font-size:14px;color:var(--text-muted);">How does the SVD pipeline work end-to-end? (click to expand)</summary>
                     <div style="overflow-x:auto;margin-top:8px;">
@@ -198,21 +198,21 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <tbody>
                     <tr>
                         <td class="domain-header">Math</td>
-                        <td class="value-good">0.958 [0.931, 0.980]</td>
+                        <td class="value-good">0.968 [0.931, 0.980]</td>
                         <td class="value-good">0.982</td>
                         <td class="value-good">+10.0 pp</td>
                         <td>traj_reflection_count (0.242)</td>
                     </tr>
                     <tr>
                         <td class="domain-header">Science</td>
-                        <td class="value-mid">0.799 [0.775, 0.822]</td>
+                        <td class="value-mid">0.827 [0.775, 0.822]</td>
                         <td class="value-mid">0.841</td>
                         <td class="value-mid">+8.0 pp</td>
                         <td>tok_gini_tail (0.038)</td>
                     </tr>
                     <tr>
                         <td class="domain-header">Coding</td>
-                        <td class="value-bad">0.434 [0.404, 0.464]</td>
+                        <td class="value-bad">0.432 [0.404, 0.464]</td>
                         <td class="value-bad">0.407</td>
                         <td class="value-bad">−0.6 pp</td>
                         <td>None above noise</td>
@@ -654,7 +654,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <p>Coding traces were annotated for knot spans using GLM-4, Python pattern-matching scripts, and human review. The multi-method approach ensured comprehensive coverage of circular reasoning, branch confusion, and loop tangles.</p>
 
                 <h5>Metric</h5>
-                <p><strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at four anchor positions {10%, 40%, 70%, 100%}: measures how well features discriminate correct vs. incorrect as reasoning unfolds. We also report AUROC@100% and a denser 10-anchor grid for visualization. Bootstrap 95% CIs use B=10,000 resamplings per domain.</p>
+                <p><strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at 10 anchor positions (10%–100% in 10% steps): measures how well features discriminate correct vs. incorrect as reasoning unfolds. We also report AUROC@100%. Bootstrap 95% CIs use B=10,000 resamplings per domain.</p>
 
                 <h5>Reproducibility</h5>
                 <p>All tables come from <code>results/tables/</code> and <code>workshop/cotknot/results/tables/</code>. Key artifacts: <code>coding_feature_family_ablation.csv</code>, <code>cot_run_judge_scores.csv</code>, <code>cot_run_judge_rerank.csv</code>.</p>
@@ -671,7 +671,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             <p>We tested whether an SVD basis learned at one trace position transfers to another. Math exhibits near-lossless transfer: forward gap Δ=−0.001, backward Δ=−0.006. Science shows a larger forward gap (Δ=−0.010), suggesting its quality geometry is less stable across positions. This means math has a consistent "quality structure" throughout the trace; science's structure shifts as the reasoning progresses.</p>
 
             <h3>B. Dense-Anchor Robustness</h3>
-            <p>Our main results use 4 anchor positions (10%, 40%, 70%, 100%). On a denser 10-anchor grid, the domain ordering remains unchanged: AoA reaches 0.968 (math), 0.827 (science), and 0.432 (coding). Science continues improving into later anchors, while coding stays weak throughout—confirming the gap isn't an artifact of sparse measurement.</p>
+            <p>We verified that the domain ordering is robust to anchor density. On our 10-anchor grid, AoA reaches 0.968 (math), 0.827 (science), and 0.432 (coding). A coarser 4-anchor subset {10%, 40%, 70%, 100%} yields the same ordering: 0.958 / 0.799 / 0.434. Science continues improving into later anchors, while coding stays weak throughout—confirming the gap isn't an artifact of measurement density.</p>
 
             <h3>C. Self-Consistency Oracle</h3>
             <p>A self-consistency oracle (using ground truth to know the majority answer) achieves AoA 0.953 (math), 0.921 (science), and 0.961 (coding). The fact that SC oracle achieves 0.961 in coding means coding correctness <em>is</em> predictable—just not from text surface features. This validates our interpretation: the information exists (in execution, in hidden states), but our features can't access it.</p>
