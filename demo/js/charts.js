@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // AUROC comparison chart
     createAUROCChart();
 
-    // Methods comparison chart
-    createMethodsChart();
+    // Methods comparison chart — replaced by HTML gauge bars in index.html (Figure 2)
+    // createMethodsChart();
 
 });
 

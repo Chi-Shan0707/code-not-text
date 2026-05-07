@@ -667,6 +667,484 @@ a:hover {
     font-size: 13px;
 }
 
+/* ========================================
+   INLINE CHECK DIAGRAMS
+   ======================================== */
+
+/* Container for each check diagram */
+.check-diagram {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 12px 0 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+
+.check-diagram .diagram-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+/* Horizontal pipeline: flex row of boxes + arrows */
+.mini-pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
+    margin: 8px 0;
+}
+
+.mini-box {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: monospace;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+    border: 1.5px solid;
+}
+
+.mini-box.wide {
+    min-width: 100px;
+    padding: 6px 18px;
+}
+
+.mini-box.narrow {
+    min-width: 56px;
+}
+
+.mini-box.accent {
+    background: rgba(34, 139, 230, 0.10);
+    border-color: rgba(34, 139, 230, 0.35);
+    color: var(--accent-color);
+}
+
+.mini-box.success {
+    background: rgba(47, 158, 68, 0.10);
+    border-color: rgba(47, 158, 68, 0.35);
+    color: var(--success-color);
+}
+
+.mini-box.danger {
+    background: rgba(250, 82, 82, 0.10);
+    border-color: rgba(250, 82, 82, 0.35);
+    color: var(--danger-color);
+}
+
+.mini-box.warning {
+    background: rgba(240, 140, 0, 0.10);
+    border-color: rgba(240, 140, 0, 0.35);
+    color: var(--warning-color);
+}
+
+.mini-box.muted {
+    background: rgba(134, 142, 150, 0.10);
+    border-color: rgba(134, 142, 150, 0.30);
+    color: var(--text-muted);
+}
+
+.mini-box.ghost {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.mini-arrow {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin: 0 8px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.mini-arrow.down {
+    display: block;
+    text-align: center;
+    margin: 4px auto;
+    font-size: 14px;
+}
+
+/* SSL-specific vertical flow */
+.ssl-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.ssl-flow .ssl-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2px 0;
+}
+
+.ssl-flow .ssl-losses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin: 4px 0;
+}
+
+.ssl-flow .loss-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: rgba(155, 89, 182, 0.12);
+    color: #9b59b6;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ssl-flow .finetune-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.ssl-flow .finetune-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-family: monospace;
+}
+
+.ssl-flow .finetune-item .result-down {
+    color: var(--danger-color);
+    font-weight: 700;
+}
+
+.ssl-flow .finetune-item .result-up {
+    color: var(--warning-color);
+    font-weight: 700;
+}
+
+/* Architecture comparison (Check 3) */
+.arch-compare {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 8px 0;
+}
+
+.arch-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: monospace;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.arch-row .arch-label {
+    min-width: 52px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.arch-row .arch-node {
+    padding: 4px 10px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 12px;
+    background: var(--bg-primary);
+}
+
+.arch-row .arch-node.hidden {
+    border-color: rgba(250, 82, 82, 0.35);
+    background: rgba(250, 82, 82, 0.06);
+    color: var(--danger-color);
+}
+
+.arch-row .arch-result {
+    margin-left: 8px;
+    font-weight: 700;
+    color: var(--danger-color);
+}
+
+/* De-knotting text example (Check 4) */
+.knot-demo {
+    margin: 8px 0;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.knot-demo .knot-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.knot-demo .knot-label {
+    min-width: 68px;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    padding-top: 2px;
+    flex-shrink: 0;
+}
+
+.knot-demo .knot-text {
+    color: var(--text-secondary);
+    position: relative;
+}
+
+.knot-highlight {
+    background: rgba(250, 82, 82, 0.15);
+    color: var(--danger-color);
+    border-bottom: 2px solid var(--danger-color);
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.knot-demo .knot-brace {
+    color: var(--danger-color);
+    font-size: 12px;
+    margin-left: 76px;
+    opacity: 0.7;
+}
+
+.knot-demo .knot-scissors {
+    color: var(--danger-color);
+    font-size: 11px;
+    margin-left: 76px;
+    letter-spacing: 2px;
+}
+
+.knot-demo .knot-after {
+    color: var(--success-color);
+    opacity: 0.85;
+}
+
+/* Cross-validation pipeline (Check 5) */
+.cv-pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin: 8px 0;
+}
+
+.cv-pipeline .cv-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cv-pipeline .cv-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ========================================
+   RESULT GAUGE BARS (Figure 2 replacement)
+   ======================================== */
+
+.gauge-container {
+    margin: 28px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 28px;
+    background: var(--bg-primary);
+}
+
+.gauge-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.gauge-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.gauge-label {
+    min-width: 120px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: right;
+    padding-right: 14px;
+    flex-shrink: 0;
+}
+
+.gauge-track {
+    flex: 1;
+    height: 22px;
+    background: rgba(134, 142, 150, 0.08);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.gauge-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    position: relative;
+}
+
+.gauge-fill.red {
+    background: linear-gradient(90deg, rgba(250, 82, 82, 0.25), rgba(250, 82, 82, 0.50));
+    border-right: 2px solid var(--danger-color);
+}
+
+.gauge-value {
+    min-width: 52px;
+    font-size: 13px;
+    font-family: monospace;
+    font-weight: 700;
+    text-align: left;
+    padding-left: 10px;
+    flex-shrink: 0;
+}
+
+.gauge-value.danger { color: var(--danger-color); }
+
+.gauge-axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding-left: 134px;
+    padding-right: 56px;
+}
+
+.gauge-axis span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+.gauge-threshold {
+    position: absolute;
+    left: 60%;  /* 0.6 threshold out of 1.0 */
+    top: -2px;
+    bottom: -2px;
+    width: 1.5px;
+    background: var(--danger-color);
+    opacity: 0.5;
+}
+
+.gauge-threshold-label {
+    position: absolute;
+    right: -4px;
+    top: -16px;
+    font-size: 10px;
+    color: var(--danger-color);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.gauge-legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    justify-content: center;
+}
+
+.gauge-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.gauge-legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+
+.gauge-legend-swatch.math { background: var(--success-color); }
+.gauge-legend-swatch.coding { background: var(--danger-color); }
+.gauge-legend-swatch.chance {
+    background: repeating-linear-gradient(
+        45deg,
+        var(--border-color),
+        var(--border-color) 2px,
+        transparent 2px,
+        transparent 4px
+    );
+}
+
+/* Gauge bars for math vs coding */
+.gauge-fill.green {
+    background: linear-gradient(90deg, rgba(47, 158, 68, 0.20), rgba(47, 158, 68, 0.45));
+    border-right: 2px solid var(--success-color);
+}
+
+.gauge-value.success { color: var(--success-color); }
+
+/* Domain signal bars */
+.domain-spectrum { display: flex; gap: 20px; justify-content: center; margin: 16px 0; flex-wrap: wrap; }
+.domain-col { text-align: center; flex: 1; min-width: 140px; }
+.domain-col .mini-box { margin-bottom: 8px; }
+.signal-bar { height: 10px; border-radius: 5px; margin: 8px auto; max-width: 180px; }
+.signal-bar.math { background: var(--success-color); width: 95%; }
+.signal-bar.science { background: var(--warning-color); width: 55%; }
+.signal-bar.coding { background: var(--danger-color); width: 15%; }
+.domain-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* Info channel ladder */
+.info-ladder { max-width: 500px; margin: 12px auto; }
+.ladder-rung {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: -1px;
+    font-size: 14px;
+    background: var(--bg-secondary);
+    display: flex; justify-content: space-between;
+}
+.ladder-rung.tested {
+    border-left: 3px solid var(--accent-color);
+    background: rgba(34,139,230,0.06);
+}
+.ladder-rung.strong {
+    border-left: 3px solid var(--success-color);
+    font-weight: 600;
+}
+.ladder-tag { font-size: 11px; color: var(--text-muted); }
+
+/* Flow mismatch diagram */
+.flow-compare { display: flex; gap: 24px; margin: 12px 0; flex-wrap: wrap; }
+.flow-track { flex: 1; min-width: 250px; }
+.flow-track-label { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted); }
+.flow-nodes { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.flow-node {
+    padding: 4px 10px; border-radius: 4px; font-size: 12px;
+    border: 1px solid var(--border-color); background: var(--bg-secondary);
+}
+.flow-node.branch {
+    border-color: rgba(250,82,82,0.4); background: rgba(250,82,82,0.08); color: var(--danger-color);
+}
+.flow-node.loop {
+    border-color: rgba(240,140,0,0.4); background: rgba(240,140,0,0.08); color: var(--warning-color);
+}
+.flow-arrow { color: var(--text-muted); font-size: 14px; }
+.flow-branch-arrow { color: var(--danger-color); font-size: 11px; }
+
 /* Responsive */
 @media (max-width: 768px) {
     body {
@@ -703,4 +1181,28 @@ a:hover {
     .header-title h1 {
         font-size: 24px;
     }
+
+    /* Diagram responsive */
+    .mini-pipeline {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .mini-arrow { margin: 0 4px; }
+
+    .gauge-label { min-width: 90px; font-size: 12px; }
+    .gauge-axis { padding-left: 104px; padding-right: 50px; }
+
+    .arch-row { font-size: 11px; }
+    .knot-demo { font-size: 11px; }
+    .knot-demo .knot-label { min-width: 55px; font-size: 11px; }
+    .knot-demo .knot-brace,
+    .knot-demo .knot-scissors { margin-left: 63px; }
+
+    .ssl-flow .ssl-losses { gap: 4px; }
+    .ssl-flow .finetune-row { flex-direction: column; gap: 6px; }
+
+    .flow-compare { flex-direction: column; gap: 16px; }
+    .domain-spectrum { flex-direction: column; align-items: center; }
+    .domain-col { min-width: 200px; }
 }

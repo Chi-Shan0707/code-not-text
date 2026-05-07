@@ -246,6 +246,28 @@ from n upwards and check the condition for each number. <span class="t-warn">how
 
             <div class="method-card">
                 <h4>Check 1: Feature Sweep — 83 Coding-Specific Scalars</h4>
+                <div class="check-diagram">
+                    <div class="diagram-label">Feature Funnel</div>
+                    <div class="mini-pipeline">
+                        <div class="mini-box wide accent" style="min-width:120px;">83 features</div>
+                        <span class="mini-arrow">&rarr;</span>
+                        <div class="mini-box accent">screen</div>
+                        <span class="mini-arrow">&rarr;</span>
+                        <div class="mini-box narrow warning">top-4</div>
+                        <span class="mini-arrow">&rarr;</span>
+                        <div class="mini-box danger" style="padding:6px 16px;">
+                            AUROC 0.556
+                        </div>
+                    </div>
+                    <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
+                        <span class="mini-box ghost" style="font-size:11px; padding:3px 8px;">struct_density</span>
+                        <span class="mini-box ghost" style="font-size:11px; padding:3px 8px;">cf_n_ifs</span>
+                        <span class="mini-box ghost" style="font-size:11px; padding:3px 8px;">indent depth</span>
+                        <span class="mini-box ghost" style="font-size:11px; padding:3px 8px;">loop nesting</span>
+                        <span class="mini-box ghost" style="font-size:11px; padding:3px 8px;">keywords</span>
+                        <span class="mini-box ghost" style="font-size:11px; padding:3px 8px;">+78 more</span>
+                    </div>
+                </div>
                 <p><strong>Approach:</strong> Designed 83 features specifically for code: <code>struct_density</code>, <code>cf_n_ifs</code> (branch count), <code>cot_trace_count</code>, indentation depth, keyword frequencies, loop nesting depth.</p>
                 <p><strong>Result:</strong> Best single feature (<code>struct_density</code>) AUROC 0.565. Best top-4 combination: <span class="method-result weak">AUROC 0.556</span></p>
                 <p><strong>Reading:</strong> These features are not pure noise—<code>cf_n_ifs</code> weakly correlates with correctness. But the effects remain small and semantically mixed. Deeper branching weakly correlates positively, denser structural narration weakly negatively. Not enough to separate correct from incorrect.</p>
@@ -253,6 +275,34 @@ from n upwards and check the condition for each number. <span class="t-warn">how
 
             <div class="method-card">
                 <h4>Check 2: Self-Supervised Pre-training</h4>
+                <div class="check-diagram">
+                    <div class="diagram-label">SSL v2 Training Pipeline</div>
+                    <div class="ssl-flow">
+                        <div class="mini-box wide accent">42K unlabeled traces</div>
+                        <span class="mini-arrow down">&darr;</span>
+                        <div class="mini-box wide accent">Per-domain encoder (50 &rarr; 24 dims)</div>
+                        <span class="mini-arrow down">&darr;</span>
+                        <div class="mini-box wide" style="background:rgba(155,89,182,0.10); border-color:rgba(155,89,182,0.35); color:#9b59b6;">Multi-objective SSL</div>
+                        <div class="ssl-losses">
+                            <span class="loss-tag">family-block mask</span>
+                            <span class="loss-tag">cross-anchor NT-Xent</span>
+                            <span class="loss-tag">future-anchor pred</span>
+                            <span class="loss-tag">VICReg</span>
+                        </div>
+                        <span class="mini-arrow down">&darr;</span>
+                        <div class="mini-box muted">Fine-tune with labels</div>
+                        <div class="finetune-row">
+                            <div class="finetune-item">
+                                <span class="mini-box ghost" style="font-size:11px; padding:2px 8px;">lf=5%</span>
+                                <span class="result-up">0.537</span>
+                            </div>
+                            <div class="finetune-item">
+                                <span class="mini-box ghost" style="font-size:11px; padding:2px 8px;">lf=100%</span>
+                                <span class="result-down">0.454 &darr;</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <p><strong>Approach:</strong> SSL on 42K unlabeled traces. SSL learns <em>text structure</em> (like BERT learns sentence structure)—recurring patterns, common phrases, syntactic regularities.</p>
                 <p><strong>v1 result:</strong> <span class="method-result poor">Collapsed—loss stalled at 0.432, rank=8 offered nothing</span></p>
                 <p><strong>v2 result:</strong> Per-domain encoders with VICReg. Coding full-label result: <span class="method-result poor">AUROC 0.454</span> — paradoxically lower than the 5%-label peak of 0.537, suggesting SSL pre-training does not uncover correctness-relevant structure and may even interfere at full supervision.</p>
@@ -261,6 +311,30 @@ from n upwards and check the condition for each number. <span class="t-warn">how
 
             <div class="method-card">
                 <h4>Check 3: Nonlinear MLP</h4>
+                <div class="check-diagram">
+                    <div class="diagram-label">Architecture Comparison</div>
+                    <div class="arch-compare">
+                        <div class="arch-row">
+                            <span class="arch-label">Linear:</span>
+                            <span class="arch-node">25D</span>
+                            <span class="mini-arrow">&rarr;</span>
+                            <span class="arch-node success" style="border-color:rgba(47,158,68,0.35); background:rgba(47,158,68,0.06); color:var(--success-color);">score</span>
+                            <span class="arch-result" style="color:var(--danger-color);">= 0.506</span>
+                        </div>
+                        <div class="arch-row">
+                            <span class="arch-label">MLP:</span>
+                            <span class="arch-node">25D</span>
+                            <span class="mini-arrow">&rarr;</span>
+                            <span class="arch-node hidden">hidden</span>
+                            <span class="mini-arrow">&rarr;</span>
+                            <span class="arch-node success" style="border-color:rgba(47,158,68,0.35); background:rgba(47,158,68,0.06); color:var(--success-color);">score</span>
+                            <span class="arch-result">= 0.499-0.507</span>
+                        </div>
+                    </div>
+                    <div style="text-align:center; margin-top:10px; font-size:12px; color:var(--text-muted);">
+                        Adding a hidden layer does not recover missing signal
+                    </div>
+                </div>
                 <p><strong>Approach:</strong> One-hidden-layer MLP on 25D features—can it learn nonlinear combinations that linear models miss?</p>
                 <p><strong>Result:</strong> <span class="method-result poor">AUROC 0.499–0.507</span></p>
                 <p><strong>Reading:</strong> Adding model capacity doesn't help. If the signal isn't in the features, no amount of nonlinearity can extract it.</p>
@@ -268,6 +342,26 @@ from n upwards and check the condition for each number. <span class="t-warn">how
 
             <div class="method-card">
                 <h4>Check 4: De-knotting — Removing Circular Reasoning Spans</h4>
+                <div class="check-diagram">
+                    <div class="diagram-label">De-knotting Process</div>
+                    <div class="knot-demo">
+                        <div class="knot-line">
+                            <span class="knot-label">Original:</span>
+                            <span class="knot-text">"check each digit&hellip; <span class="knot-highlight">wait, actually, but note: condition says divisible by t</span> &hellip;so for n=1"</span>
+                        </div>
+                        <div class="knot-brace">&boxvr;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh; knot span &boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxh;&boxdl;</div>
+                        <div class="knot-scissors">&scissor; &scissor; &scissor; &mdash; GLM-4 identifies &amp; removes knot tokens</div>
+                        <div class="knot-line" style="margin-top:6px;">
+                            <span class="knot-label">Spliced:</span>
+                            <span class="knot-text knot-after">"check each digit&hellip; &hellip;so for n=1"</span>
+                        </div>
+                        <div style="margin-top:6px; text-align:center;">
+                            <span class="mini-box" style="background:rgba(134,142,150,0.10); border-color:rgba(134,142,150,0.30); color:var(--text-muted); font-size:12px;">
+                                Result: Coding &Delta;=+0.006 (neutral)
+                            </span>
+                        </div>
+                    </div>
+                </div>
                 <p><strong>Approach:</strong> One hypothesis: coding traces contain noisy circular spans ("knots") that obscure an otherwise useful signal. We used GLM-4 and human annotation to identify knot spans, then removed them from all cached per-token arrays.</p>
                 <p><strong>Result by domain:</strong></p>
                 <ul>
@@ -280,14 +374,99 @@ from n upwards and check the condition for each number. <span class="t-warn">how
 
             <div class="method-card">
                 <h4>Check 5: Coding-Specific Run Judge</h4>
+                <div class="check-diagram">
+                    <div class="diagram-label">Cross-Validation Pipeline</div>
+                    <div class="cv-pipeline">
+                        <div class="cv-row">
+                            <div class="mini-box wide accent">19 surface features</div>
+                            <span class="mini-arrow">&rarr;</span>
+                            <div class="mini-box wide" style="background:rgba(155,89,182,0.10); border-color:rgba(155,89,182,0.35); color:#9b59b6;">GroupKFold 5-fold</div>
+                            <span class="mini-arrow">&rarr;</span>
+                            <div class="mini-box danger">OOF AUC 0.481</div>
+                        </div>
+                        <div class="cv-note" style="margin-top:6px;">
+                            &uarr; grouped by <code style="font-size:11px;">problem_id</code> &mdash; each fold holds out unseen problems
+                        </div>
+                        <div style="margin-top:10px; text-align:center; font-size:12px; color:var(--text-muted);">
+                            &plusmn; 0.053 across folds &mdash; consistent with chance (0.5)
+                        </div>
+                    </div>
+                </div>
                 <p><strong>Approach:</strong> 19 surface features (planning density, vocabulary overlap, structural flags, length, neuron count, <code>cot_mode</code> indicators). Evaluated on unseen <code>problem_id</code>s via 5-fold GroupKFold.</p>
                 <p><strong>Result:</strong> <span class="method-result poor">OOF AUC 0.481 ± 0.053</span> — fails on unseen problems</p>
                 <p><strong>Reading:</strong> Surface cues that appear meaningful within problems do not generalize across problems.</p>
             </div>
 
-            <div class="chart-container">
-                <canvas id="methodsChart"></canvas>
-                <div class="chart-caption">Figure 2: All five robustness checks on coding. No approach achieves meaningful discrimination (AUROC > 0.6).</div>
+            <div class="gauge-container">
+                <div class="gauge-title">Figure 2: Coding AUROC Across Five Robustness Checks</div>
+
+                <div class="gauge-row">
+                    <span class="gauge-label">Feature Sweep</span>
+                    <div class="gauge-track">
+                        <div class="gauge-fill red" style="width:55.6%;"></div>
+                        <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
+                    </div>
+                    <span class="gauge-value danger">0.556</span>
+                </div>
+
+                <div class="gauge-row">
+                    <span class="gauge-label">SSL (5% label)</span>
+                    <div class="gauge-track">
+                        <div class="gauge-fill red" style="width:53.7%;"></div>
+                        <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
+                    </div>
+                    <span class="gauge-value danger">0.537</span>
+                </div>
+
+                <div class="gauge-row">
+                    <span class="gauge-label">MLP</span>
+                    <div class="gauge-track">
+                        <div class="gauge-fill red" style="width:50.3%;"></div>
+                        <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
+                    </div>
+                    <span class="gauge-value danger">0.503</span>
+                </div>
+
+                <div class="gauge-row">
+                    <span class="gauge-label">Run Judge</span>
+                    <div class="gauge-track">
+                        <div class="gauge-fill red" style="width:48.1%;"></div>
+                        <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
+                    </div>
+                    <span class="gauge-value danger">0.481</span>
+                </div>
+
+                <div class="gauge-row">
+                    <span class="gauge-label">De-knotting</span>
+                    <div class="gauge-track">
+                        <div class="gauge-fill red" style="width:46.6%;"></div>
+                        <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
+                    </div>
+                    <span class="gauge-value danger">0.466</span>
+                </div>
+
+                <div style="position:relative; margin-top:4px;">
+                    <div class="gauge-axis" style="padding-left:134px; padding-right:52px;">
+                        <span>0.0</span>
+                        <span style="position:absolute; left:calc(134px + 25% - 8px);">0.25</span>
+                        <span style="position:absolute; left:calc(134px + 50% - 52px); color:var(--text-muted); font-weight:600;">chance 0.5</span>
+                        <span style="position:absolute; left:calc(134px + 75% - 56px - 12px);">0.75</span>
+                        <span>1.0</span>
+                    </div>
+                </div>
+
+                <div class="gauge-legend">
+                    <div class="gauge-legend-item">
+                        <span class="gauge-legend-swatch coding"></span>
+                        Coding (all below threshold)
+                    </div>
+                    <div class="gauge-legend-item">
+                        <span class="gauge-legend-swatch chance"></span>
+                        Chance = 0.5
+                    </div>
+                </div>
+
+                <div class="chart-caption" style="margin-top:18px; margin-bottom:0;">All five robustness checks on coding. No approach clears the AUROC 0.6 threshold. Results cluster near or below chance (0.5).</div>
             </div>
         </section>
 
@@ -305,6 +484,47 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             <p>Science problems share some verbal uncertainty cues with math, but the usable signal comes primarily from token confidence, not trajectory structure. This makes sense: science questions often test <em>knowledge</em> rather than <em>reasoning process</em>. The model either knows the answer (high confidence) or doesn't.</p>
 
             <h3>Coding: Correctness Lives in the Execution</h3>
+
+            <div class="check-diagram">
+                <div class="diagram-label">Linear Text vs. Non-linear Code Execution</div>
+                <div class="flow-compare">
+                    <div class="flow-track">
+                        <div class="flow-track-label">Linear CoT text</div>
+                        <div class="flow-nodes">
+                            <span class="flow-node">Step 1</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node">Step 2</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node">Step 3</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node">Step 4</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node">Step 5</span>
+                        </div>
+                    </div>
+                    <div class="flow-track">
+                        <div class="flow-track-label">Actual code execution</div>
+                        <div class="flow-nodes" style="flex-wrap:wrap; gap:3px;">
+                            <span class="flow-node">Step 1</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node">Step 2</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node branch">if X?</span>
+                            <span class="flow-branch-arrow">&nwarr;</span>
+                            <span class="flow-node branch">Step 3a</span>
+                            <span class="flow-branch-arrow">/</span>
+                            <span class="flow-node branch">Step 3b</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node loop">&#x21BB;</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node">Step 4</span>
+                            <span class="flow-arrow">&rarr;</span>
+                            <span class="flow-node">Step 5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <p>Programming involves control flow that natural language cannot faithfully represent:</p>
             <ul>
                 <li><strong>Branches:</strong> Conditional logic with mutually exclusive paths. In linear text, the model describes both paths simultaneously.</li>
@@ -328,6 +548,54 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             <h2>6. What This Means</h2>
 
             <h3>Practical Takeaway</h3>
+
+            <div class="check-diagram">
+                <div class="diagram-label">Domain Signal Strength</div>
+                <div class="domain-spectrum">
+                    <div class="domain-col">
+                        <div class="mini-box success">Math</div>
+                        <div class="signal-bar math"></div>
+                        <div class="domain-label">Strong CoT signal<br>(reasoning features)</div>
+                    </div>
+                    <div class="domain-col">
+                        <div class="mini-box warning">Science</div>
+                        <div class="signal-bar science"></div>
+                        <div class="domain-label">Moderate CoT signal<br>(confidence proxy)</div>
+                    </div>
+                    <div class="domain-col">
+                        <div class="mini-box danger">Coding</div>
+                        <div class="signal-bar coding"></div>
+                        <div class="domain-label">Near-zero CoT signal<br>(execution needed)</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <div class="diagram-label" style="margin-bottom: 10px;">Information Channels (weakest &rarr; strongest)</div>
+                    <div class="info-ladder">
+                        <div class="ladder-rung">
+                            <span>CoT surface text</span>
+                            <span class="ladder-tag">weakest</span>
+                        </div>
+                        <div class="ladder-rung tested">
+                            <span>CoT token probabilities</span>
+                            <span class="ladder-tag">&larr; we tested this</span>
+                        </div>
+                        <div class="ladder-rung">
+                            <span>Model hidden states</span>
+                            <span class="ladder-tag"></span>
+                        </div>
+                        <div class="ladder-rung">
+                            <span>LLM-as-judge</span>
+                            <span class="ladder-tag"></span>
+                        </div>
+                        <div class="ladder-rung strong">
+                            <span>Execution feedback / test cases</span>
+                            <span class="ladder-tag">strongest</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <p>For math and science, cheap CoT surface features are genuinely useful—they enable early stopping, best-of-N selection, and quality monitoring at near-zero cost. For coding, you need stronger signals: execution feedback, test cases, or model internals.</p>
 
             <h3>What We Don't Claim</h3>
