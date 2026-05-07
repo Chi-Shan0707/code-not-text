@@ -169,7 +169,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             <h3>The Pipeline</h3>
             <div class="technical-box">
                 <p><code>StandardScaler → TruncatedSVD → LogisticRegression</code></p>
-                <p>Fit separately per domain. Evaluation uses problem-grouped splits. The main metric is <strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at 10 anchor positions (10%–100% in 10% steps)—measuring how well features discriminate correct vs. incorrect solutions as the reasoning unfolds. Bootstrap 95% CIs use B=10,000 resamplings.</p>
+                <p>Fit separately per domain. Evaluation uses problem-grouped splits. The main metric is <strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at four anchor positions {10%, 40%, 70%, 100%}—measuring how well features discriminate correct vs. incorrect solutions as the reasoning unfolds. Figure 1 shows a denser 10-position view for visualization. Bootstrap 95% CIs use B=10,000 resamplings.</p>
                 <details style="margin-top:12px;">
                     <summary style="cursor:pointer;font-size:14px;color:var(--text-muted);">How does the SVD pipeline work end-to-end? (click to expand)</summary>
                     <div style="overflow-x:auto;margin-top:8px;">
@@ -406,7 +406,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             </div>
 
             <div class="gauge-container">
-                <div class="gauge-title">Figure 2: Math vs Coding AUROC Across Five Robustness Checks</div>
+                <div class="gauge-title">Figure 2: Coding AUROC Across Five Robustness Checks</div>
 
                 <div class="gauge-row">
                     <span class="gauge-label">Feature Sweep</span>
@@ -420,7 +420,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 </div>
 
                 <div class="gauge-row">
-                    <span class="gauge-label">SSL Pre-training</span>
+                    <span class="gauge-label">SSL (full label)</span>
                     <div class="gauge-track">
                         <div class="gauge-fill green" style="width:97.8%;"></div>
                         <div class="gauge-fill red" style="width:45.4%; position:absolute; top:0; left:0;"></div>
@@ -444,23 +444,22 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <div class="gauge-row">
                     <span class="gauge-label">De-knotting</span>
                     <div class="gauge-track">
-                        <div class="gauge-fill green" style="width:98.8%;"></div>
-                        <div class="gauge-fill red" style="width:44.0%; position:absolute; top:0; left:0;"></div>
+                        <div class="gauge-fill green" style="width:45.3%;"></div>
+                        <div class="gauge-fill red" style="width:46.6%; position:absolute; top:0; left:0;"></div>
                         <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
                     </div>
-                    <span class="gauge-value" style="color:var(--success-color);">0.988</span>
-                    <span class="gauge-value danger">0.440</span>
+                    <span class="gauge-value" style="color:var(--success-color);">0.453</span>
+                    <span class="gauge-value danger">0.466</span>
                 </div>
 
                 <div class="gauge-row">
-                    <span class="gauge-label">Interpretable Probe</span>
+                    <span class="gauge-label">Run Judge</span>
                     <div class="gauge-track">
-                        <div class="gauge-fill green" style="width:98.2%;"></div>
-                        <div class="gauge-fill red" style="width:43.4%; position:absolute; top:0; left:0;"></div>
+                        <div class="gauge-fill red" style="width:48.1%;"></div>
                         <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
                     </div>
-                    <span class="gauge-value" style="color:var(--success-color);">0.982</span>
-                    <span class="gauge-value danger">0.434</span>
+                    <span class="gauge-value" style="color:var(--text-muted); font-size:12px;">—</span>
+                    <span class="gauge-value danger">0.481</span>
                 </div>
 
                 <div style="position:relative; margin-top:4px;">
@@ -476,19 +475,20 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <div class="gauge-legend">
                     <div class="gauge-legend-item">
                         <span class="gauge-legend-swatch" style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--success-color);"></span>
-                        Math (consistently strong)
+                        Math
                     </div>
                     <div class="gauge-legend-item">
                         <span class="gauge-legend-swatch" style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--danger-color);"></span>
-                        Coding (consistently weak)
+                        Coding
                     </div>
                     <div class="gauge-legend-item">
                         <span class="gauge-legend-swatch chance"></span>
                         Chance = 0.5
                     </div>
                 </div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">De-knotting values: AUROC on de-knotted data (Math: 0.502→0.453; Coding: 0.460→0.466). Run Judge: coding-specific, no Math equivalent.</div>
 
-                <div class="chart-caption" style="margin-top:18px; margin-bottom:0;">Five independent robustness checks. Math AUROC stays above 0.97 across all methods; coding never clears 0.6. The gap is not a method artifact.</div>
+                <div class="chart-caption" style="margin-top:12px; margin-bottom:0;">Five independent robustness checks. For the first three, Math AUROC stays above 0.97 while coding never clears 0.6. De-knotting operates at a different scale (subset evaluation) but confirms the same pattern: signal exists in math, not in coding.</div>
             </div>
         </section>
 
@@ -654,7 +654,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                 <p>Coding traces were annotated for knot spans using GLM-4, Python pattern-matching scripts, and human review. The multi-method approach ensured comprehensive coverage of circular reasoning, branch confusion, and loop tangles.</p>
 
                 <h5>Metric</h5>
-                <p><strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at 10 anchor positions (10%–100% in 10% steps): measures how well features discriminate correct vs. incorrect as reasoning unfolds. We also report AUROC@100%. Bootstrap 95% CIs use B=10,000 resamplings per domain.</p>
+                <p><strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at four anchor positions {10%, 40%, 70%, 100%}: measures how well features discriminate correct vs. incorrect as reasoning unfolds. We also report AUROC@100% and a denser 10-anchor grid for visualization. Bootstrap 95% CIs use B=10,000 resamplings per domain.</p>
 
                 <h5>Reproducibility</h5>
                 <p>All tables come from <code>results/tables/</code> and <code>workshop/cotknot/results/tables/</code>. Key artifacts: <code>coding_feature_family_ablation.csv</code>, <code>cot_run_judge_scores.csv</code>, <code>cot_run_judge_rerank.csv</code>.</p>
