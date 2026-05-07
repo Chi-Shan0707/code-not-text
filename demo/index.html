@@ -170,6 +170,14 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             <div class="technical-box">
                 <p><code>StandardScaler → TruncatedSVD → LogisticRegression</code></p>
                 <p>Fit separately per domain. Evaluation uses problem-grouped splits. The main metric is <strong>AoA (AUC-of-AUROC)</strong>—the arithmetic mean of AUROC values at 10 anchor positions (10%–100% in 10% steps)—measuring how well features discriminate correct vs. incorrect solutions as the reasoning unfolds. Bootstrap 95% CIs use B=10,000 resamplings.</p>
+                <details style="margin-top:12px;">
+                    <summary style="cursor:pointer;font-size:14px;color:var(--text-muted);">How does the SVD pipeline work end-to-end? (click to expand)</summary>
+                    <div style="overflow-x:auto;margin-top:8px;">
+                        <img src="images/svd_pipeline.svg"
+                             alt="SVD pipeline: X_raw + X_rank → X_rep → StandardScaler → TruncatedSVD → LogisticRegression"
+                             style="width:100%;max-width:1100px;height:auto;border-radius:10px;border:1px solid var(--border-color);">
+                    </div>
+                </details>
             </div>
         </section>
 
@@ -398,67 +406,81 @@ from n upwards and check the condition for each number. <span class="t-warn">how
             </div>
 
             <div class="gauge-container">
-                <div class="gauge-title">Figure 2: Coding AUROC Across Five Robustness Checks</div>
+                <div class="gauge-title">Figure 2: Math vs Coding AUROC Across Five Robustness Checks</div>
 
                 <div class="gauge-row">
                     <span class="gauge-label">Feature Sweep</span>
                     <div class="gauge-track">
-                        <div class="gauge-fill red" style="width:55.6%;"></div>
+                        <div class="gauge-fill green" style="width:99.0%;"></div>
+                        <div class="gauge-fill red" style="width:55.6%; position:absolute; top:0; left:0;"></div>
                         <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
                     </div>
+                    <span class="gauge-value" style="color:var(--success-color);">0.990</span>
                     <span class="gauge-value danger">0.556</span>
                 </div>
 
                 <div class="gauge-row">
-                    <span class="gauge-label">SSL (5% label)</span>
+                    <span class="gauge-label">SSL Pre-training</span>
                     <div class="gauge-track">
-                        <div class="gauge-fill red" style="width:53.7%;"></div>
+                        <div class="gauge-fill green" style="width:97.8%;"></div>
+                        <div class="gauge-fill red" style="width:45.4%; position:absolute; top:0; left:0;"></div>
                         <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
                     </div>
-                    <span class="gauge-value danger">0.537</span>
+                    <span class="gauge-value" style="color:var(--success-color);">0.978</span>
+                    <span class="gauge-value danger">0.454</span>
                 </div>
 
                 <div class="gauge-row">
-                    <span class="gauge-label">MLP</span>
+                    <span class="gauge-label">Nonlinear MLP</span>
                     <div class="gauge-track">
-                        <div class="gauge-fill red" style="width:50.3%;"></div>
+                        <div class="gauge-fill green" style="width:98.5%;"></div>
+                        <div class="gauge-fill red" style="width:50.3%; position:absolute; top:0; left:0;"></div>
                         <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
                     </div>
+                    <span class="gauge-value" style="color:var(--success-color);">0.985</span>
                     <span class="gauge-value danger">0.503</span>
-                </div>
-
-                <div class="gauge-row">
-                    <span class="gauge-label">Run Judge</span>
-                    <div class="gauge-track">
-                        <div class="gauge-fill red" style="width:48.1%;"></div>
-                        <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
-                    </div>
-                    <span class="gauge-value danger">0.481</span>
                 </div>
 
                 <div class="gauge-row">
                     <span class="gauge-label">De-knotting</span>
                     <div class="gauge-track">
-                        <div class="gauge-fill red" style="width:46.6%;"></div>
+                        <div class="gauge-fill green" style="width:98.8%;"></div>
+                        <div class="gauge-fill red" style="width:44.0%; position:absolute; top:0; left:0;"></div>
                         <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
                     </div>
-                    <span class="gauge-value danger">0.466</span>
+                    <span class="gauge-value" style="color:var(--success-color);">0.988</span>
+                    <span class="gauge-value danger">0.440</span>
+                </div>
+
+                <div class="gauge-row">
+                    <span class="gauge-label">Interpretable Probe</span>
+                    <div class="gauge-track">
+                        <div class="gauge-fill green" style="width:98.2%;"></div>
+                        <div class="gauge-fill red" style="width:43.4%; position:absolute; top:0; left:0;"></div>
+                        <div class="gauge-threshold"><span class="gauge-threshold-label">0.6</span></div>
+                    </div>
+                    <span class="gauge-value" style="color:var(--success-color);">0.982</span>
+                    <span class="gauge-value danger">0.434</span>
                 </div>
 
                 <div style="position:relative; margin-top:4px;">
-                    <div class="gauge-axis" style="padding-left:134px; padding-right:52px;">
+                    <div class="gauge-axis" style="padding-left:134px; padding-right:90px;">
                         <span>0.0</span>
                         <span style="position:absolute; left:calc(134px + 25% - 8px);">0.25</span>
                         <span style="position:absolute; left:calc(134px + 50% - 52px); color:var(--text-muted); font-weight:600;">chance 0.5</span>
-                        <span style="position:absolute; left:calc(134px + 75% - 56px - 12px);">0.75</span>
+                        <span style="position:absolute; left:calc(134px + 75% - 12px);">0.75</span>
                         <span>1.0</span>
                     </div>
                 </div>
 
                 <div class="gauge-legend">
                     <div class="gauge-legend-item">
-                        <span class="gauge-legend-swatch coding"></span>
-                        Coding (all below threshold)
+                        <span class="gauge-legend-swatch" style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--success-color);"></span>
+                        Math (consistently strong)
+                    </div>
+                    <div class="gauge-legend-item">
+                        <span class="gauge-legend-swatch" style="display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--danger-color);"></span>
+                        Coding (consistently weak)
                     </div>
                     <div class="gauge-legend-item">
                         <span class="gauge-legend-swatch chance"></span>
@@ -466,7 +488,7 @@ from n upwards and check the condition for each number. <span class="t-warn">how
                     </div>
                 </div>
 
-                <div class="chart-caption" style="margin-top:18px; margin-bottom:0;">All five robustness checks on coding. No approach clears the AUROC 0.6 threshold. Results cluster near or below chance (0.5).</div>
+                <div class="chart-caption" style="margin-top:18px; margin-bottom:0;">Five independent robustness checks. Math AUROC stays above 0.97 across all methods; coding never clears 0.6. The gap is not a method artifact.</div>
             </div>
         </section>
 
