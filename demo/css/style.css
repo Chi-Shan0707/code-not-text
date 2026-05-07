@@ -1145,6 +1145,26 @@ a:hover {
 .flow-arrow { color: var(--text-muted); font-size: 14px; }
 .flow-branch-arrow { color: var(--danger-color); font-size: 11px; }
 
+/* SVD pipeline expand button */
+.svd-expand-btn summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    border: none;
+    transition: opacity 0.2s, transform 0.1s;
+}
+.svd-expand-btn summary:hover { opacity: 0.85; }
+.svd-expand-btn summary:active { transform: scale(0.98); }
+.svd-expand-btn[open] > summary::before { content: "✕ "; }
+
 /* Responsive */
 @media (max-width: 768px) {
     body {
