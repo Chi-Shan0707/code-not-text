@@ -31,7 +31,7 @@ Can simple summaries of chain-of-thought (CoT) traces indicate whether a solutio
 
 Results differ substantially across domains. In math, the signal is strong: our probe achieves AUC-of-AUROC (AoA) 0.958 and AUROC@100\% 0.982, with dense-anchor curves plateauing early and best-of-$N=64$ reranking improving by $+10.0$ percentage points. Science shows a different pattern: the full probe reaches AoA 0.799 and AUROC@100\% 0.841 but does not exceed a simple token-confidence baseline (0.809 / 0.856), with permutation importance concentrated on confidence-based features.
 
-Coding presents a distinct contrast. On LiveCodeBench-v5, the main probe achieves only AoA 0.434 and AUROC@100\% 0.407. Sweeping 83 coding-specific scalars peaks at AUROC 0.556. Grouped feature ablations remain near chance. A coding-specific CoT-only judge using 19 surface features achieves 5-fold GroupKFold out-of-fold AUC of $0.481 \pm 0.053$ and no best-of-$64$ gain ($-0.006$). Neither nonlinear models nor self-supervised pre-training substantially improve performance, and token-level de-knotting shows no benefit.
+Coding presents a distinct contrast. On LiveCodeBench-v5, the main probe achieves only AoA 0.434 and AUROC@100\% 0.407. Sweeping 83 coding-specific scalars peaks at AUROC 0.556. Grouped feature ablations remain near chance. A coding-specific CoT-only judge using 19 surface features achieves 5-fold GroupKFold out-of-fold AUC of $0.481 \pm 0.053$ and no best-of-$64$ gain ($-0.006$). Neither nonlinear models nor self-supervised pre-training improve performance, and token-level de-knotting shows no benefit.
 
 We therefore draw a narrower conclusion than earlier drafts: in this single-model study, hand-crafted CoT-surface features work well for math, partially for science, and poorly for coding correctness on unseen problems. This finding does not imply that raw-text classifiers, code-aware models, execution-aware selectors, or hidden-state probes must fail. Rather, it identifies one specific feature family whose semantics do not transfer cleanly to code verification.
 \end{abstract}
@@ -42,9 +42,14 @@ Process supervision and verifier-based reranking typically assume that answer qu
 
 We examine a focused question: rather than asking whether all text-based verifiers fail on code, we investigate whether one particular family---cheap, interpretable CoT-surface features---transfers across domains. This family comprises token-confidence summaries, trajectory statistics, and activation-based descriptors that are computationally lightweight and straightforward to evaluate at test time.
 
-Domain-specific results differ markedly. Mathematical reasoning exhibits strong early signals. Science problems show usable but narrower signals, primarily driven by token confidence. Coding presents a clear contrast: across multiple approaches---the main probe, extended scalar sweeps, grouped feature ablations, a coding-specific judge, nonlinear models, self-supervised pre-training, and token-level de-knotting---performance on unseen problems remains weak.
+The three domains produce qualitatively different patterns. Mathematical reasoning exhibits strong early signals. Science problems show usable but narrower signals, primarily driven by token confidence. Coding presents a clear contrast: across multiple approaches (the main probe, extended scalar sweeps, grouped feature ablations, a coding-specific judge, nonlinear models, self-supervised pre-training, and token-level de-knotting), performance on unseen problems remains weak.
 
 Our contribution is empirical: we demonstrate where this feature family excels (math), where it provides partial but limited utility (science), and where it fails to transfer (coding). This negative result has value---it shows that the chosen features do not reliably track correctness in all domains, even when they succeed in some.
+
+\paragraph{Contributions.}
+(1)~A cross-domain comparison of CoT-surface features on one model, revealing that the same feature family can be highly informative (math), partially useful (science), or near-chance (coding).
+(2)~Multiple converging negative checks for coding: scalar sweeps, family ablations, a domain-specific judge, nonlinear models, SSL pre-training, and de-knotting all fail to produce a generalizable coding verifier.
+(3)~A downstream demonstration that weak run-level discrimination translates to zero best-of-$N$ selection gain in coding, unlike math and science.
 
 \section{Related Work}
 
@@ -129,7 +134,7 @@ SC oracle$^\dagger$ & .953 / .921 / .961 & .953 / .921 / .961 & --- & --- \\
 \end{table}
 
 \paragraph{Math: strong and structured signal.}
-The math probe substantially outperforms the token-confidence baseline: AoA $0.958$ versus $0.685$, and AUROC@100\% $0.982$ versus $0.684$. This signal emerges early---on a denser 10-anchor grid, math reaches 95\% of its final AUROC by the 10\% anchor and plateaus by 50\%, achieving dense-anchor AoA $0.968$.
+The math probe clearly outperforms the token-confidence baseline: AoA $0.958$ versus $0.685$, and AUROC@100\% $0.982$ versus $0.684$. This signal emerges early---on a denser 10-anchor grid, math reaches 95\% of its final AUROC by the 10\% anchor and plateaus by 50\%, achieving dense-anchor AoA $0.968$.
 
 \paragraph{Science: usable but narrower than math.}
 Science results stay above chance and improve with more context, yet differ qualitatively from math. The full probe achieves AoA $0.799$ and AUROC@100\% $0.841$, while a simple \texttt{tok\_conf} baseline reaches slightly higher values (AoA $0.809$, AUROC@100\% $0.856$). The science signal is genuine but appears largely confidence-driven rather than trajectory-structured.
@@ -153,7 +158,7 @@ For coding, these hand-crafted CoT-surface features fail to predict correctness 
 The main coding probe achieves AoA $0.434$ and AUROC@100\% $0.407$, below the \texttt{tok\_conf} baseline (AoA $0.506$, AUROC@100\% $0.490$). Screening 83 coding-specific scalars yields limited improvement: the best single feature, \texttt{struct\_density}, reaches oriented AUROC $0.565$, followed by \texttt{cf\_n\_ifs} ($0.563$) and \texttt{cot\_trace\_count} ($0.558$). Even the optimal top-4 combination achieves only AUROC $0.556$.
 
 \paragraph{Interpretation.}
-These features are not pure noise---they exhibit weak but detectable correlations. However, the strongest effects remain small and semantically mixed. For instance, deeper branching and more \texttt{if}-statements weakly correlate positively with correctness, while denser structural narration shows weak negative correlation. While variation exists, it does not reliably separate correct from incorrect solutions.
+These features are not pure noise: they exhibit weak but detectable correlations. However, the strongest effects remain small and semantically mixed. For instance, deeper branching and more \texttt{if}-statements weakly correlate positively with correctness, while denser structural narration shows weak negative correlation. While variation exists, it does not reliably separate correct from incorrect solutions.
 
 \subsection{Grouped family ablations}
 
@@ -169,7 +174,7 @@ Performance remains weak. Mean out-of-fold AUC is $0.481 \pm 0.053$. By difficul
 
 A one-hidden-layer MLP on the 25-dimensional feature family produces similar results: mean-anchor AUROC $0.499$ and AUROC@100\% $0.507$.
 
-Self-supervised pre-training provides further evidence. Cross-domain SSL v1 collapses at one rank without meaningful coding improvement. Domain-specific SSL v2 avoids collapse and offers modest low-label regularization, yet the full-label coding ceiling remains weak: the best v2 configuration achieves AUROC $0.454$ at label fraction 1.0, peaking at $0.537$ when label fraction is 0.05. We interpret SSL as indicating that these objectives do not uncover additional label-relevant structure in this feature space, not as proof that no useful structure exists.
+Self-supervised pre-training provides further evidence (Figure~\ref{fig:ssl}). Cross-domain SSL v1 collapses at one rank without meaningful coding improvement. Domain-specific SSL v2 avoids collapse and offers modest low-label regularization, yet the full-label coding ceiling remains weak: the best v2 configuration achieves AUROC $0.454$ at label fraction 1.0, peaking at $0.537$ when label fraction is 0.05. We interpret SSL as indicating that these objectives do not uncover additional label-relevant structure in this feature space, not as proof that no useful structure exists.
 
 \begin{figure*}[t]
   \centering
@@ -184,7 +189,7 @@ Self-supervised pre-training provides further evidence. Cross-domain SSL v1 coll
 
 \subsection{De-knotting remains neutral in coding}
 
-One alternative explanation posits that coding traces contain noisy circular spans that obscure an otherwise useful signal. We test this by removing GLM-labeled knot spans from all cached per-token arrays, not just from the text.
+One alternative explanation posits that coding traces contain noisy circular spans that obscure an otherwise useful signal. We test this by removing GLM-labeled knot spans from all cached per-token arrays, not just from the text (Figure~\ref{fig:deknot}).
 
 \begin{figure*}[t]
   \centering
@@ -197,7 +202,7 @@ One alternative explanation posits that coding traces contain noisy circular spa
   \label{fig:deknot}
 \end{figure*}
 
-Results differ by domain. In math, removing knot tokens degrades AUROC ($0.502 \rightarrow 0.453$, $\Delta=-0.049$), indicating these spans contribute to the signal. Science shows minimal change ($\Delta=-0.006$). Coding remains neutral ($0.460 \rightarrow 0.466$, $\Delta=+0.006$). De-knotting does not rescue coding performance.
+Results differ by domain. In math, removing knot tokens degrades AUROC ($0.502 \rightarrow 0.453$, $\Delta=-0.049$), indicating these spans contribute to the signal. Science shows minimal change ($\Delta=-0.006$). Coding remains neutral ($0.460 \rightarrow 0.466$, $\Delta=+0.006$). De-knotting does not rescue coding performance. Table~\ref{tab:convergence} summarizes all coding-side robustness checks.
 
 \begin{table}[t]
 \centering
@@ -223,7 +228,7 @@ De-knotting & $\Delta = +.006$ & Neutral \\
 \section{Downstream Impact: Best-of-\texorpdfstring{$N$}{N} Reranking}
 \label{sec:reranking}
 
-The cross-domain probe results affect more than just metrics---they change downstream selection behavior.
+The cross-domain probe results affect more than just metrics---they change downstream selection behavior (Figure~\ref{fig:reranking}, Table~\ref{tab:reranking}).
 
 \begin{figure}[t]
   \centering
@@ -288,7 +293,22 @@ We draw a narrower conclusion than earlier drafts. The evidence supports this st
 This negative result remains valuable: it shows that cheap CoT measurements should be treated as domain-specific instruments, not general-purpose correctness proxies. For coding, at least with this model and feature family, they are the wrong tool.
 
 \paragraph{Code and artifacts.}
-The public repository for this project is \url{https://github.com/Chi-Shan0707/code-not-text}. In the local snapshot used for this draft, code and paper assets remain under \texttt{workshop/cotknot/}. Paper sources are in \texttt{workshop/cotknot/paper/}. Quantitative tables used here come from \texttt{results/tables/} and \texttt{workshop/cotknot/results/tables/}. The coding-side robustness checks in this revision rely in particular on four artifacts: \texttt{results/tables/coding\_feature\_family\_ablation.csv}, \texttt{results/tables/cot\_run\_judge\_scores.csv}, \texttt{results/tables/cot\_run\_judge\_rerank.csv}, and \texttt{results/models/cot\_run\_judge.summary.json}.
+All code and data are available at \url{https://github.com/Chi-Shan0707/code-not-text}.
+
+\paragraph{Data availability.}
+All experimental traces, cached activations, and evaluation scripts are included in the public repository. Bootstrap confidence intervals can be reproduced from the provided scripts with $B=10{,}000$ resamplings.
+
+\paragraph{Author contributions.}
+\textbf{Y.\ Chi:} Conceptualization, Methodology, Software, Formal analysis, Investigation, Data Curation, Writing -- Original Draft, Writing -- Review \& Editing, Visualization.
+
+\paragraph{Competing interests.}
+The author declares no competing interests.
+
+\paragraph{Funding.}
+This work received no external funding.
+
+\paragraph{AI-use disclosure.}
+The author used AI-assisted tools (large language models) for code debugging, figure generation, and manuscript proofreading. All scientific claims, experimental designs, and analyses were conceived and verified by the author.
 
 \bibliographystyle{plainnat}
 \begin{thebibliography}{16}
